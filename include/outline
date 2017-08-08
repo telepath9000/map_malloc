@@ -1,5 +1,0 @@
-malloc:
-	1. Check for size.
-		a. if smaller than large then check if global is NULL
-		b. if NULL create new global node.
-		c. check if enough space in respective type memory

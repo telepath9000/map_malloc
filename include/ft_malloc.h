@@ -6,7 +6,7 @@
 /*   By: wdebs <marvin@42.fr>                       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/08/05 19:39:46 by wdebs             #+#    #+#             */
-/*   Updated: 2017/08/05 19:47:57 by wdebs            ###   ########.fr       */
+/*   Updated: 2017/08/07 17:34:35 by wdebs            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,33 +18,31 @@
 # include <sys/resource.h>
 # include <limits.h>
 
-# define TINY		32768 
-# define SMALL		131072
-# define LARGE		1
-# define NOT_LARGE	2
-# define YES		1
-# define NO			0
-# define MAX_SMALLS	100
+# define TOTAL_STRUCT_SIZE_LARGE
+# define TOTAL_STRUCT_SIZE_SMALL	
+# define SMALL_ALLOC_TOTAL	19200
+# define TINY				32768
+# define TINY_SIZE			32
+# define TINY_INC			4
+# define SMALL				131072
+# define SMALL_SIZE			128
+# define SMALL_INC			16
+# define LARGE				1
+# define NOT_LARGE			2
+# define YES				1
+# define NO					0
+# define MAX_SMALLS			200
 
-typedef struct		s_smalls
-{
-	struct s_smalls	*next;
-	struct s_smalls	*head;
-	void			*ptr;
-}
-
-// allocation for tiny and small needs to be done contiguously in memory for it to be worthwhile.
-// large structs can be tacked onto the end, possibly save the start of the large list to jump to it in space?
-// small structs can then be added between the end of the smalls and the start of the larges.
-// t_smalls structs will now be used as a linked list to hold the pointers to each segment of memory that can
-// be used.
-// When a small struct is empty it will then be freed completely and the two adjacent structs will be linked
-// together.
+// figure out how mmap maps a struct and in what order for pointer arithmetic.
 
 typedef struct		s_mem
 {
-	struct s_mem	*next;
+	void			*next; // cast as t_mem
+	void			*prev; // cast as t_mem
 	void			*large;
+	void			*current_small;
+	void			*start;
+	size_t			large_size;
 	size_t			tiny_count;
 	size_t			small_count;
 	int				type;
@@ -53,7 +51,7 @@ typedef struct		s_mem
 t_mem				*g_mem;
 
 void				ft_free(void *ptr);
-void				ft_malloc(size_t size);
+void				*ft_malloc(size_t size);
 void*				ft_realloc(void *ptr, size_t size);
 t_mem*				alloc_mem(size_t size);
 void				show_alloc_mem(void);

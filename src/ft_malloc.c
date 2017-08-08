@@ -6,7 +6,7 @@
 /*   By: wdebs <marvin@42.fr>                       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/08/05 16:32:37 by wdebs             #+#    #+#             */
-/*   Updated: 2017/08/05 17:47:57 by wdebs            ###   ########.fr       */
+/*   Updated: 2017/08/07 16:47:45 by wdebs            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,6 @@ void	*ft_malloc(size_t size)
 {
 	t_mem	*ret;
 
-	ret = alloc_mem();
+	ret = alloc_mem(size);
 	return (ret);
 }
