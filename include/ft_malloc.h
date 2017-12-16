@@ -18,42 +18,69 @@
 # include <sys/resource.h>
 # include <limits.h>
 
-# define TOTAL_STRUCT_SIZE_LARGE
-# define TOTAL_STRUCT_SIZE_SMALL	
-# define SMALL_ALLOC_TOTAL	19200
-# define TINY				32768
-# define TINY_SIZE			32
-# define TINY_INC			4
-# define SMALL				131072
-# define SMALL_SIZE			128
-# define SMALL_INC			16
-# define LARGE				1
-# define NOT_LARGE			2
-# define YES				1
-# define NO					0
-# define MAX_SMALLS			200
+# define PAGE getpagesize()
+# define SMALL_BYTES 256
+# define MED_BYTES 512
+# define SIZES (sizeof(t_small *) + sizeof(t_large *) + sizeof(t_med *)) * 2
+# define GLOBAL SIZES + sizeof(size_t) * 3
+# define SMALL (256 * 100) > PAGE ? (((256 * 100) / PAGE) * PAGE) + PAGE : PAGE
+# define MED (512 * 100) > PAGE ? (((512 * 100) / PAGE) * PAGE) + PAGE : PAGE
+# define LARGE 1
+# define SMALL_ALLOC (sizeof(int) * 101) + sizeof(t_small *) + SMALL
+# define MED_ALLOC (sizeof(int) * 101) + sizeof(t_med *) + MED
+# define LARGE_ALLOC sizeof(int) + sizeof(t_large *)
 
-// figure out how mmap maps a struct and in what order for pointer arithmetic.
+/*
+** Possibly store pointer list indeces in hash table contained in g_mem, one table for each size
+** 
+** Storing pointer positions in an array of long ints with binary values representing filled or not
+**
+** For medium size posibly use trie? binary tree with binary representation?
+*/
+
+typedef struct		s_small
+{
+	struct s_small	*next;
+	unsigned char	table[13];
+	void			*data;
+}					t_small;
+
+/*
+** possibly turn med into a tree structure
+*/
+
+typedef struct		s_med
+{
+	struct s_med	*next;
+	unsigned char	table[13];
+	void			*data;
+}					t_med;
+
+typedef struct		s_large
+{
+	struct s_large	*next;
+	size_t			size;
+	void			*data;
+}					t_large;
 
 typedef struct		s_mem
 {
-	void			*next; // cast as t_mem
-	void			*prev; // cast as t_mem
-	void			*large;
-	void			*current_small;
-	void			*start;
-	size_t			large_size;
-	size_t			tiny_count;
-	size_t			small_count;
-	int				type;
+	t_small			*small;
+	t_small			*stail;
+	t_med			*med;
+	t_med			*mtail;
+	t_large			*large;
+	t_large			*ltail;
+	size_t			ssize;
+	size_t			msize;
+	size_t			lsize;
 }					t_mem;
 
-t_mem				*g_mem;
+extern t_mem		*g_mem;
 
 void				ft_free(void *ptr);
 void				*ft_malloc(size_t size);
-void*				ft_realloc(void *ptr, size_t size);
-t_mem*				alloc_mem(size_t size);
+void				*ft_realloc(void *ptr, size_t size);
 void				show_alloc_mem(void);
 
 #endif
