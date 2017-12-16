@@ -36,12 +36,16 @@
 ** Storing pointer positions in an array of long ints with binary values representing filled or not
 **
 ** For medium size posibly use trie? binary tree with binary representation?
+**
+** consider making the three diferrent structs an array of the same kind of linked list
+** that is allocated for diferent sizes
 */
 
 typedef struct		s_small
 {
 	struct s_small	*next;
 	unsigned char	table[13];
+	int				filled;
 	void			*data;
 }					t_small;
 
@@ -61,7 +65,6 @@ typedef struct		s_large
 {
 	struct s_large	*next;
 	size_t			size;
-	int				filled;
 	void			*data;
 }					t_large;
 

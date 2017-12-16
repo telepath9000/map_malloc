@@ -11,3 +11,16 @@
 /* ************************************************************************** */
 
 #include "ft_malloc.c"
+
+int		free_small(void *ptr)
+{
+
+}
+
+void	ft_free(void *ptr)
+{
+	if (!free_small(ptr) && !free_med(ptr))
+		free_large(ptr);
+	if (!(g_mem->ssize + g_mem->msize + g_mem->lsize))
+		munmap(g_mem, GLOBAL);
+}
