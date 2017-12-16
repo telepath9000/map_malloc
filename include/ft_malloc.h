@@ -53,6 +53,7 @@ typedef struct		s_med
 {
 	struct s_med	*next;
 	unsigned char	table[13];
+	int				filled;
 	void			*data;
 }					t_med;
 
@@ -60,6 +61,7 @@ typedef struct		s_large
 {
 	struct s_large	*next;
 	size_t			size;
+	int				filled;
 	void			*data;
 }					t_large;
 

@@ -12,8 +12,6 @@
 
 #include "ft_malloc.h"
 
-t_mem		*g_mem = NULL;
-
 static void	init_mem(void)
 {
 	mmap((void *)g_mem, GLOBAL_ALLOC,
@@ -36,17 +34,19 @@ static void	init_chunk(void *memory, char type, size_t size)
 	i = 0;
 	if (!g_mem)
 		init_mem();
-	while (type == SMALL && ++i < 14)
+	while (type == SMALL && ++i < 14 && ((t_small *)memory)->filled = 1)
 	{
+		g_mem->ssize = (i == 1) ? g_mem->ssize + 1 : g_mem->ssize;
+		((t_small *)memory)->table[0] = 1;
 		((t_small *)memory)->next = NULL;
 		((t_small *)memory)->table[i] = 0;
-		g_mem->ssize++;
 	}
-	while (typ == MED && ++i < 14)
+	while (type == MED && ++i < 14 && ((t_med *)memory)->filled = 1)
 	{
+		g_mem->msize = (i == 1) ? g_mem->msize + 1 : g_mem->msize;
+		((t_med *)memory)->table[0] = 1;
 		((t_med *)memory)->next = NULL;
 		((t_med *)memory)->table[i] = 0;
-		g_mem->msize++;
 	}
 	if (type == LARGE)
 	{
@@ -60,14 +60,27 @@ static void	init_chunk(void *memory, char type, size_t size)
 static void	*place_memory(void *memory, char type, size_t size)
 {
 	void	*ptr;
-	void	*mem;
 
 	init_chunk(memory, type, size);
-	if (type == LARGE)
-	{
-		if (!g_mem->large)
-		{
-			g_mem->large = (t_large *)memory
+	if (type == LARGE && !g_mem->large)
+		g_mem->large = (t_large *)memory;
+	if (type == LARGE && g_mem->ltail)
+		g_mem->ltail->next = (t_large *)memory;
+	if (type == LARGE && (g_mem->ltail = (t_large *)memory))
+		ptr = g_mem->ltail;
+	if (type == MED && !g_mem->med)
+		g_mem->med = (t_med *)memory;
+	if (type == MED && g_mem->mtail)
+		g_mem->mtail->next = (t_med *)memory;
+	if (type == MED && (g_mem->mtail = (t_med *)memory))
+		ptr = g_mem->mtail;
+	if (type == SMALL && !g_mem->small)
+		g_mem->small = (t_small *)memory;
+	if (type == SMALL && g_mem->stail)
+		g_mem->stail->next = (t_small *)memory;
+	if (type == SMALL && (g_mem->stail = (t_small *)memory))
+		ptr = g_mem->stail;
+	return (ptr);
 }
 
 void		*alloc_core(size_t size)
