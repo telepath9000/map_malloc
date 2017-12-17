@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "ft_malloc.h"
+#include "../include/ft_malloc.h"
 
 t_mem		*g_mem = NULL;
 
@@ -19,7 +19,7 @@ t_mem		*g_mem = NULL;
 **	are seperate typedef's.
 */
 
-static void	*search_memory_med(size_t size)
+static void	*search_memory_med(void)
 {
 	void	*ret;
 	t_med	*cur;
@@ -44,7 +44,7 @@ static void	*search_memory_med(size_t size)
 	return (ret);
 }
 
-static void	*search_memory_small(size_t size)
+static void	*search_memory_small(void)
 {
 	void	*ret;
 	t_small	*cur;
@@ -79,9 +79,9 @@ void		*ft_malloc(size_t size)
 		if (g_mem)
 		{
 			if (size <= SMALL_BYTES)
-				ptr = search_memory_small(size);
+				ptr = search_memory_small();
 			else if (size <= MED_BYTES)
-				ptr = search_memory_med(size);
+				ptr = search_memory_med();
 			if (!ptr)
 				ptr = alloc_core(size);
 		}

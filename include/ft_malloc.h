@@ -23,8 +23,8 @@
 # define MED_BYTES 512
 # define SIZES (sizeof(t_small *) + sizeof(t_large *) + sizeof(t_med *)) * 2
 # define GLOBAL SIZES + sizeof(size_t) * 3
-# define SMALL (256 * 100) > PAGE ? (((256 * 100) / PAGE) * PAGE) + PAGE : PAGE
-# define MED (512 * 100) > PAGE ? (((512 * 100) / PAGE) * PAGE) + PAGE : PAGE
+# define SMALL ((256 * 100) > PAGE) ? (((256 * 100) / PAGE) * PAGE) + PAGE : PAGE
+# define MED ((512 * 100) > PAGE) ? (((512 * 100) / PAGE) * PAGE) + PAGE : PAGE
 # define LARGE 1
 # define SMALL_ALLOC (sizeof(int) * 101) + sizeof(t_small *) + SMALL
 # define MED_ALLOC (sizeof(int) * 101) + sizeof(t_med *) + MED
@@ -87,5 +87,6 @@ void				ft_free(void *ptr);
 void				*ft_malloc(size_t size);
 void				*ft_realloc(void *ptr, size_t size);
 void				show_alloc_mem(void);
+void				*alloc_core(size_t size);
 
 #endif

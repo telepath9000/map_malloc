@@ -4,16 +4,16 @@ endif
 
 NAME = libft_malloc_$(HOSTTYPE).so
 CC = gcc
-SRC = src/
+SRC = src/alloc_core.c src/ft_malloc.c
 INC = include
-OBJECTS = src/main.o
+OBJECTS = src/alloc_core.o src/ft_malloc.o
 IFLAGS = -L
-LFLAGS = -c -fPIC
+LFLAGS = -c
 CFLAGS = -Wall -Werror -Wextra -g
 all: $(NAME)
 $(NAME): $(OBJECTS)
-	$(CC) $(CFLAGS) $(IFLAGS) $(INC) $(LFLAGS) $(SRC) -o $@
-	$(CC) $(OBJECTS) -shared -o $@
+	$(CC) $(CFLAGS) $(IFLAGS) $(INC) $(LFLAGS) $(SRC) -o -fPIC $<
+	$(CC) $(OBJECTS) -shared -o -fPIC $@
 clean:
 	$(RM) $(OBJECTS)
 fclean: clean

@@ -10,11 +10,11 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "ft_malloc.h"
+#include "../include/ft_malloc.h"
 
 static void	init_mem(void)
 {
-	mmap((void *)g_mem, GLOBAL_ALLOC,
+	mmap((void *)g_mem, GLOBAL,
 				PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
 	g_mem->small = NULL;
 	g_mem->stail = NULL;
@@ -34,14 +34,14 @@ static void	init_chunk(void *memory, char type, size_t size)
 	i = 0;
 	if (!g_mem)
 		init_mem();
-	while (type == SMALL && ++i < 14 && ((t_small *)memory)->filled = 1)
+	while (type == SMALL && ++i < 14 && (((t_small *)memory)->filled = 1))
 	{
 		g_mem->ssize = (i == 1) ? g_mem->ssize + 1 : g_mem->ssize;
 		((t_small *)memory)->table[0] = 1;
 		((t_small *)memory)->next = NULL;
 		((t_small *)memory)->table[i] = 0;
 	}
-	while (type == MED && ++i < 14 && ((t_med *)memory)->filled = 1)
+	while (type == MED && ++i < 14 && (((t_med *)memory)->filled = 1))
 	{
 		g_mem->msize = (i == 1) ? g_mem->msize + 1 : g_mem->msize;
 		((t_med *)memory)->table[0] = 1;
@@ -89,6 +89,7 @@ void		*alloc_core(size_t size)
 	void	*memory;
 	void	*ptr;
 
+	memory = NULL;
 	if (size > MED_BYTES && (type = LARGE))
 		mmap(memory, LARGE_ALLOC + size,
 				PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
