@@ -18,6 +18,8 @@
 # include <sys/resource.h>
 # include <limits.h>
 
+#include <stdio.h>
+
 # define PAGE getpagesize()
 # define SMALL_BYTES 256
 # define MED_BYTES 512

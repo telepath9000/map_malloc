@@ -14,8 +14,8 @@
 
 static void	init_mem(void)
 {
-	mmap((void *)g_mem, GLOBAL,
-				PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
+	g_mem = mmap(0, GLOBAL,
+				PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
 	g_mem->small = NULL;
 	g_mem->stail = NULL;
 	g_mem->med = NULL;
@@ -27,37 +27,30 @@ static void	init_mem(void)
 	g_mem->lsize = 0;
 }
 
-static void	init_chunk(void *memory, char type, size_t size)
+static void	init_chunk(void *memory, int type, size_t size)
 {
 	int	i;
 
 	i = 0;
 	if (!g_mem)
 		init_mem();
-	while (type == SMALL && ++i < 14 && (((t_small *)memory)->filled = 1))
-	{
-		g_mem->ssize = (i == 1) ? g_mem->ssize + 1 : g_mem->ssize;
-		((t_small *)memory)->table[0] = 1;
+	if (type == SMALL && (((t_small *)memory)->table[0] = 1) &&
+			(((t_small *)memory)->filled = 1) && g_mem->ssize++)
 		((t_small *)memory)->next = NULL;
-		((t_small *)memory)->table[i] = 0;
-	}
-	while (type == MED && ++i < 14 && (((t_med *)memory)->filled = 1))
-	{
-		g_mem->msize = (i == 1) ? g_mem->msize + 1 : g_mem->msize;
-		((t_med *)memory)->table[0] = 1;
+	if (type == MED && (((t_med *)memory)->table[0] = 1) &&
+			(((t_med *)memory)->filled = 1) && g_mem->msize++)
 		((t_med *)memory)->next = NULL;
-		((t_med *)memory)->table[i] = 0;
-	}
-	if (type == LARGE)
-	{
-		((t_large *)memory)->next = NULL;
+	if (type == LARGE && (((t_large *)memory)->next = NULL) &&
+			g_mem->lsize++)
 		((t_large *)memory)->size = size;
-		g_mem->lsize++;
-	}
+	while (type == SMALL && ++i < 13)
+		((t_small *)memory)->table[i] = 0;
+	while (type == MED && ++i < 13)
+		((t_med *)memory)->table[i] = 0;
 }
 
 
-static void	*place_memory(void *memory, char type, size_t size)
+static void	*place_memory(void *memory, int type, size_t size)
 {
 	void	*ptr;
 
@@ -85,20 +78,20 @@ static void	*place_memory(void *memory, char type, size_t size)
 
 void		*alloc_core(size_t size)
 {
-	char	type;
+	int		type;
 	void	*memory;
 	void	*ptr;
 
 	memory = NULL;
 	if (size > MED_BYTES && (type = LARGE))
-		mmap(memory, LARGE_ALLOC + size,
-				PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
+		memory = mmap(0 , LARGE_ALLOC + size, PROT_READ | PROT_WRITE,
+				MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
 	else if (size <= MED_BYTES && size > SMALL_BYTES && (type = MED))
-		mmap(memory, MED_ALLOC,
-				PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
+		memory = mmap(0, MED_ALLOC, PROT_READ | PROT_WRITE,
+				MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
 	else if ((type = SMALL))
-		mmap(memory, SMALL_ALLOC,
-				PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
+		memory = mmap(0, SMALL_ALLOC, PROT_READ | PROT_WRITE,
+				MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
 	ptr = place_memory(memory, type, size);
 	return (ptr);
 }

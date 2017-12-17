@@ -30,8 +30,11 @@ static void	*search_memory_med(void)
 	cur = g_mem->med;
 	while (cur)
 	{
+		if (cur->next == NULL)
+			printf("A\n");
 		if (cur->filled < 100)
 		{
+			printf("B\n");
 			while ((cur->table[(i / 8) - 1] << (i % 8)) & 1)
 				i++;
 			cur->table[(i / 8) - 1] |= (1 << (i % 8));
@@ -82,9 +85,9 @@ void		*ft_malloc(size_t size)
 				ptr = search_memory_small();
 			else if (size <= MED_BYTES)
 				ptr = search_memory_med();
-			if (!ptr)
-				ptr = alloc_core(size);
 		}
+		if (!ptr)
+			ptr = alloc_core(size);
 	}
 	return (ptr);
 }
