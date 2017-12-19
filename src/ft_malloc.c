@@ -15,7 +15,8 @@
 t_mem		*g_mem = NULL;
 
 /*
-**	Will implement different data structures for small and medium sizes later, this is why they
+**	Will implement different data structures for small and
+**	medium sizes later, this is why they
 **	are seperate typedef's.
 */
 
@@ -23,6 +24,7 @@ static void	*search_memory_med(void)
 {
 	void	*ret;
 	t_med	*cur;
+	static int check = 0;
 	int		i;
 
 	i = 8;
@@ -30,20 +32,20 @@ static void	*search_memory_med(void)
 	cur = g_mem->med;
 	while (cur)
 	{
-		if (cur->next == NULL)
-			printf("A\n");
+		i = 8;
 		if (cur->filled < 100)
 		{
-			printf("B\n");
-			while ((cur->table[(i / 8) - 1] << (i % 8)) & 1)
+			while ((cur->table[(i / 8) - 1] >> (i % 8)) & 1 && i < 108)
 				i++;
 			cur->table[(i / 8) - 1] |= (1 << (i % 8));
 			cur->filled++;
-			ret = cur->data + (i * MED_BYTES);
+			check++;
+			ret = cur->data + ((i - 8) * MED_BYTES);
 			break ;
 		}
 		cur = cur->next;
 	}
+	cur = g_mem->med->next;
 	return (ret);
 }
 
@@ -58,13 +60,14 @@ static void	*search_memory_small(void)
 	cur = g_mem->small;
 	while (cur)
 	{
+		i = 8;
 		if (cur->filled < 100)
 		{
-			while ((cur->table[(i / 8) - 1] << (i % 8)) & 1)
+			while ((cur->table[(i / 8) - 1] << (i % 8)) & 1 && i < 108)
 				i++;
-			cur->table[(i / 8) - 1] |= (1 << (i % 8));
+			cur->table[(i / 8) - 1] |= (1 << ((i % 8) - 1));
 			cur->filled++;
-			ret = cur->data + (i * SMALL_BYTES);
+			ret = cur->data + ((i - 8) * SMALL_BYTES);
 			break ;
 		}
 		cur = cur->next;
@@ -77,13 +80,15 @@ void		*ft_malloc(size_t size)
 	void	*ptr;
 
 	ptr = NULL;
-	if (size > 0)
+	if (!check_limit(size))
+		write(2, "ERROR: virtual memory space limit has been reached.\n", 56);
+	else if (size > 0)
 	{
 		if (g_mem)
 		{
-			if (size <= SMALL_BYTES)
+			if (size <= SMALL_BYTES && g_mem->small)
 				ptr = search_memory_small();
-			else if (size <= MED_BYTES)
+			else if (size <= MED_BYTES && g_mem->med)
 				ptr = search_memory_med();
 		}
 		if (!ptr)

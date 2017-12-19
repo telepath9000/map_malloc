@@ -17,30 +17,30 @@
 # include <unistd.h>
 # include <sys/resource.h>
 # include <limits.h>
+# include <sys/time.h>
 
 #include <stdio.h>
 
-# define PAGE getpagesize()
 # define SMALL_BYTES 256
 # define MED_BYTES 512
 # define SIZES (sizeof(t_small *) + sizeof(t_large *) + sizeof(t_med *)) * 2
-# define GLOBAL SIZES + sizeof(size_t) * 3
-# define SMALL ((256 * 100) > PAGE) ? (((256 * 100) / PAGE) * PAGE) + PAGE : PAGE
-# define MED ((512 * 100) > PAGE) ? (((512 * 100) / PAGE) * PAGE) + PAGE : PAGE
+# define GLOBAL SIZES + (sizeof(size_t) * 3) + sizeof(rlim_t)
 # define LARGE 1
-# define SMALL_ALLOC (sizeof(int) * 101) + sizeof(t_small *) + SMALL
-# define MED_ALLOC (sizeof(int) * 101) + sizeof(t_med *) + MED
-# define LARGE_ALLOC sizeof(int) + sizeof(t_large *)
+# define SMALL_ALLOC (sizeof(int) * 14) + sizeof(t_small *) + sizeof(void *)
+# define MED_ALLOC (sizeof(int) * 14) + sizeof(t_med *) + sizeof(void *)
+# define LARGE_ALLOC sizeof(int) + sizeof(t_large *) + sizeof(void *)
 
 /*
-** Possibly store pointer list indeces in hash table contained in g_mem, one table for each size
+**	Possibly store pointer list indeces in hash table contained in g_mem,
+**	one table for each size
 ** 
-** Storing pointer positions in an array of long ints with binary values representing filled or not
+**	Storing pointer positions in an array of long ints with binary
+**	values representing filled or not
 **
-** For medium size posibly use trie? binary tree with binary representation?
+**	For medium size posibly use trie? binary tree with binary representation?
 **
-** consider making the three diferrent structs an array of the same kind of linked list
-** that is allocated for diferent sizes
+**	consider making the three diferrent structs an array of the same kind of
+**	linked list that is allocated for diferent sizes
 */
 
 typedef struct		s_small
@@ -81,14 +81,28 @@ typedef struct		s_mem
 	size_t			ssize;
 	size_t			msize;
 	size_t			lsize;
+	rlim_t			total_mem;
 }					t_mem;
 
 extern t_mem		*g_mem;
 
 void				ft_free(void *ptr);
+
 void				*ft_malloc(size_t size);
+
 void				*ft_realloc(void *ptr, size_t size);
+
 void				show_alloc_mem(void);
+
 void				*alloc_core(size_t size);
+
+/*
+** utilities.c
+*/
+
+size_t				get_alloc_size(size_t size);
+int					check_limit(size_t size);
+int					error_handle_munmap(void *target, size_t size);
+void				set_limit(size_t type, size_t inc);
 
 #endif
