@@ -1,3 +1,2 @@
 TODO:
-		-segfault after allocating 100 small size allocs.
-
+		- Thoroughly test ft_realloc for logical errors and segfaults.

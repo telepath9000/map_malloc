@@ -12,7 +12,7 @@
 
 #include "../include/ft_malloc.h"
 
-static void	free_core(void *prev, void *target, int type)
+void		free_core(void *prev, void *target, int type)
 {
 	if (type == SMALL_BYTES)
 	{
@@ -74,13 +74,13 @@ static int	free_med(void *ptr)
 	cur = g_mem->med;
 	prev = NULL;
 	ret = 0;
-	while ((i = 7) && cur)
+	while ((i = -1) && cur)
 	{
-		while (++i < 108)
-			if ((cur->table[(i / 8) - 1] >> (i % 8)) & 1  &&
-					ptr == cur->data + ((i - 8) * MED_BYTES) && cur->filled--)
+		while (++i < 100)
+			if (cur->table[i] && ptr == cur->data + (i * MED_BYTES) &&
+					cur->filled--)
 			{
-				cur->table[(i / 8) - 1] ^= (1 << (i % 8));
+				cur->table[i] = 0;
 				if (++ret && !cur->filled)
 					free_core((void *)prev, (void *)cur, MED_BYTES);
 				cur = NULL;
@@ -103,13 +103,13 @@ static int	free_small(void *ptr)
 	cur = g_mem->small;
 	prev = NULL;
 	ret = 0;
-	while ((i = 7) && cur)
+	while ((i = 0) && cur)
 	{
-		while (++i - 8 < 100)
-			if ((cur->table[(i / 8) - 1] >> (i % 8)) & 1 &&
-					ptr == cur->data + ((i - 8) * SMALL_BYTES) && cur->filled--)
+		while (++i < 100)
+			if (cur->table[i] && ptr == cur->data + (i * SMALL_BYTES) &&
+					cur->filled--)
 			{
-				cur->table[(i / 8) - 1] ^= (1 << ((i % 8) - 1));
+				cur->table[i] = 0;
 				if (++ret && !cur->filled)
 					free_core((void *)prev, (void *)cur, SMALL_BYTES);
 				cur = NULL;

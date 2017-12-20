@@ -20,54 +20,51 @@ t_mem		*g_mem = NULL;
 **	are seperate typedef's.
 */
 
-static void	*search_memory_med(void)
+static void	*search_memory_med(int size)
 {
 	void	*ret;
 	t_med	*cur;
-	static int check = 0;
 	int		i;
 
-	i = 8;
+	i = 0;
 	ret = NULL;
 	cur = g_mem->med;
 	while (cur)
 	{
-		i = 8;
+		i = 0;
 		if (cur->filled < 100)
 		{
-			while ((cur->table[(i / 8) - 1] >> (i % 8)) & 1 && i < 108)
+			while (i < 100 && cur->table[i])
 				i++;
-			cur->table[(i / 8) - 1] |= (1 << (i % 8));
+			cur->table[i] = size;
 			cur->filled++;
-			check++;
-			ret = cur->data + ((i - 8) * MED_BYTES);
+			ret = cur->data + (i* MED_BYTES);
 			break ;
 		}
 		cur = cur->next;
 	}
-	cur = g_mem->med->next;
 	return (ret);
 }
 
-static void	*search_memory_small(void)
+static void	*search_memory_small(int size)
 {
 	void	*ret;
 	t_small	*cur;
 	int		i;
 
-	i = 8;
+	i = 0;
 	ret = NULL;
 	cur = g_mem->small;
 	while (cur)
 	{
-		i = 8;
+		i = 0;
 		if (cur->filled < 100)
 		{
-			while ((cur->table[(i / 8) - 1] << (i % 8)) & 1 && i < 108)
+			while (cur->table[i])
 				i++;
-			cur->table[(i / 8) - 1] |= (1 << ((i % 8) - 1));
+			cur->table[i] = size;
 			cur->filled++;
-			ret = cur->data + ((i - 8) * SMALL_BYTES);
+			ret = cur->data + (i * SMALL_BYTES);
 			break ;
 		}
 		cur = cur->next;
@@ -87,9 +84,9 @@ void		*ft_malloc(size_t size)
 		if (g_mem)
 		{
 			if (size <= SMALL_BYTES && g_mem->small)
-				ptr = search_memory_small();
+				ptr = search_memory_small(size);
 			else if (size <= MED_BYTES && g_mem->med)
-				ptr = search_memory_med();
+				ptr = search_memory_med(size);
 		}
 		if (!ptr)
 			ptr = alloc_core(size);

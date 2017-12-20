@@ -96,3 +96,15 @@ size_t	get_alloc_size(size_t size)
 			LARGE_ALLOC : page;
 	return (ret);
 }
+
+void	malcpy(void *dest, void *src, size_t len)
+{
+	size_t	i;
+
+	i = 0;
+	while (i < len)
+	{
+		((char *)dest)[i] = ((char *)src)[i];
+		i++;
+	}
+}

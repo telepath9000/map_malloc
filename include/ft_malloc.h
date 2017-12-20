@@ -26,8 +26,8 @@
 # define SIZES (sizeof(t_small *) + sizeof(t_large *) + sizeof(t_med *)) * 2
 # define GLOBAL SIZES + (sizeof(size_t) * 3) + sizeof(rlim_t)
 # define LARGE 1
-# define SMALL_ALLOC (sizeof(int) * 14) + sizeof(t_small *) + sizeof(void *)
-# define MED_ALLOC (sizeof(int) * 14) + sizeof(t_med *) + sizeof(void *)
+# define SMALL_ALLOC (sizeof(int) * 101) + sizeof(t_small *) + sizeof(void *)
+# define MED_ALLOC (sizeof(int) * 101) + sizeof(t_med *) + sizeof(void *)
 # define LARGE_ALLOC sizeof(int) + sizeof(t_large *) + sizeof(void *)
 
 /*
@@ -46,7 +46,7 @@
 typedef struct		s_small
 {
 	struct s_small	*next;
-	unsigned char	table[13];
+	int				table[100];
 	int				filled;
 	void			*data;
 }					t_small;
@@ -58,7 +58,7 @@ typedef struct		s_small
 typedef struct		s_med
 {
 	struct s_med	*next;
-	unsigned char	table[13];
+	int				table[100];
 	int				filled;
 	void			*data;
 }					t_med;
@@ -87,6 +87,8 @@ typedef struct		s_mem
 extern t_mem		*g_mem;
 
 void				ft_free(void *ptr);
+void				free_core(void *prev, void *target, int type);
+
 
 void				*ft_malloc(size_t size);
 
@@ -104,5 +106,6 @@ size_t				get_alloc_size(size_t size);
 int					check_limit(size_t size);
 int					error_handle_munmap(void *target, size_t size);
 void				set_limit(size_t type, size_t inc);
+void				malcpy(void *dest, void *src, size_t len);
 
 #endif

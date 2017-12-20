@@ -4,9 +4,11 @@ endif
 
 NAME = libft_malloc_$(HOSTTYPE).so
 CC = gcc
-SRC = src/alloc_core.c src/ft_malloc.c src/ft_free.c src/utilities.c
+SRC = src/alloc_core.c src/ft_malloc.c src/ft_free.c src/utilities.c \
+	  src/ft_realloc.c
 INC = -Iinclude
-OBJECTS = src/alloc_core.o src/ft_malloc.o src/ft_free.o src/utilities.o
+OBJECTS = src/alloc_core.o src/ft_malloc.o src/ft_free.o src/utilities.o \
+		  src/ft_realloc.o
 CFLAGS = -g -fPIC -Wall -Werror -Wextra
 LDFLAGS = -shared
 all: $(NAME)
