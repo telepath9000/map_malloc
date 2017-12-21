@@ -106,6 +106,6 @@ size_t				get_alloc_size(size_t size);
 int					check_limit(size_t size);
 int					error_handle_munmap(void *target, size_t size);
 void				set_limit(size_t type, size_t inc);
-void				malcpy(void *dest, void *src, size_t len);
+void				malcpy(void *dest, void *src, size_t ref_len, size_t len);
 
 #endif

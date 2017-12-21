@@ -25,10 +25,9 @@ static size_t	check_large(void *ptr, size_t size)
 	{
 		if (ptr == cur->data)
 		{
-			tmp_size = cur->size;
-			cur->size = size;
-			if (get_alloc_size(tmp_size) < get_alloc_size(size))
-				free_core((void *)prev, (void *)cur, cur->size);
+			if (get_alloc_size(tmp_size) < get_alloc_size(size) &&
+					(tmp_size = cur->size) && (cur->size = size))
+				free_core((void *)prev, (void *)cur, tmp_size);
 			cur = NULL;
 			break ;
 		}
@@ -111,7 +110,7 @@ void		*ft_realloc(void *ptr, size_t size)
 			((ref_size = check_large(ptr, size)) && size > MED_BYTES))
 	{
 		ret = ft_malloc(size);
-		malcpy(ret, ptr, ref_size);
+		malcpy(ret, ptr, ref_size, size);
 	}
 	return (ret);
 }

@@ -97,12 +97,12 @@ size_t	get_alloc_size(size_t size)
 	return (ret);
 }
 
-void	malcpy(void *dest, void *src, size_t len)
+void	malcpy(void *dest, void *src, size_t ref_len, size_t len)
 {
 	size_t	i;
 
 	i = 0;
-	while (i < len)
+	while (i < len && i < ref_len)
 	{
 		((char *)dest)[i] = ((char *)src)[i];
 		i++;
