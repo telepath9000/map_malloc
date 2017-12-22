@@ -23,7 +23,7 @@ static size_t	check_large(void *ptr, size_t size)
 	tmp_size = 0;
 	while (cur)
 	{
-		if (ptr == cur->data)
+		if (ptr == (char *)cur + LARGE_ALLOC)
 		{
 			if (get_alloc_size(tmp_size) < get_alloc_size(size) &&
 					(tmp_size = cur->size) && (cur->size = size))
@@ -50,11 +50,11 @@ static size_t	check_med(void *ptr, size_t size)
 	cur = g_mem->med;
 	prev = NULL;
 	ret = 0;
-	while ((i = 0) && cur)
+	while ((i = -1) && cur)
 	{
 		while (++i < 100)
-			if (cur->table[i] && ptr == cur->data + (i * MED_BYTES) &&
-				(ret = cur->table[i]) && (cur->table[i] = size) &&
+			if (cur->table[i] && ptr == (char *)cur + MED_ALLOC +
+				(i * MED_BYTES) && (ret = cur->table[i]) && (cur->table[i] = size) &&
 				(size > MED_BYTES || size < SMALL_BYTES) && cur->filled--)
 			{
 				cur->table[i] = 0;
@@ -82,7 +82,7 @@ static size_t	check_small(void *ptr, size_t size)
 	while ((i = 0) && cur)
 	{
 		while (++i < 100)
-			if (cur->table[i] && ptr == cur->data + (i * SMALL_BYTES) &&
+			if (cur->table[i] && ptr == (char *)cur + SMALL_ALLOC + (i * SMALL_BYTES) &&
 				(ret = cur->table[i]) && (cur->table[i] = size) &&
 			   	size > SMALL_BYTES && cur->filled--)
 			{

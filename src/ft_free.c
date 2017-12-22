@@ -50,7 +50,7 @@ static void	free_large(void *ptr)
 	cur = g_mem->large;
 	while (cur)
 	{
-		if (ptr == cur->data)
+		if (ptr == (char *)cur + LARGE_ALLOC)
 		{
 			free_core((void *)prev, (void *)cur, cur->size);
 			cur = NULL;
@@ -77,8 +77,8 @@ static int	free_med(void *ptr)
 	while ((i = -1) && cur)
 	{
 		while (++i < 100)
-			if (cur->table[i] && ptr == cur->data + (i * MED_BYTES) &&
-					cur->filled--)
+			if (cur->table[i] && ptr == (char *)cur + MED_ALLOC +
+					(i * MED_BYTES) && cur->filled--)
 			{
 				cur->table[i] = 0;
 				if (++ret && !cur->filled)
@@ -103,11 +103,11 @@ static int	free_small(void *ptr)
 	cur = g_mem->small;
 	prev = NULL;
 	ret = 0;
-	while ((i = 0) && cur)
+	while ((i = -1) && cur)
 	{
 		while (++i < 100)
-			if (cur->table[i] && ptr == cur->data + (i * SMALL_BYTES) &&
-					cur->filled--)
+			if (cur->table[i] && ptr == (char *)cur +
+					SMALL_ALLOC + (i * SMALL_BYTES) && cur->filled--)
 			{
 				cur->table[i] = 0;
 				if (++ret && !cur->filled)

@@ -26,19 +26,20 @@ static void	*search_memory_med(int size)
 	t_med	*cur;
 	int		i;
 
-	i = 0;
 	ret = NULL;
 	cur = g_mem->med;
 	while (cur)
 	{
-		i = 0;
+		i = (cur->filled < 50) ? 0: 99;
 		if (cur->filled < 100)
 		{
-			while (i < 100 && cur->table[i])
+			while (cur->filled < 50 && cur->table[i])
 				i++;
+			while (cur->filled >= 50 && cur->table[i])
+				i--;
 			cur->table[i] = size;
 			cur->filled++;
-			ret = cur->data + (i* MED_BYTES);
+			ret = (char *)cur + MED_ALLOC + (i * MED_BYTES);
 			break ;
 		}
 		cur = cur->next;
@@ -52,19 +53,20 @@ static void	*search_memory_small(int size)
 	t_small	*cur;
 	int		i;
 
-	i = 0;
 	ret = NULL;
 	cur = g_mem->small;
 	while (cur)
 	{
-		i = 0;
+		i = (cur->filled < 50) ? 0 : 99;
 		if (cur->filled < 100)
 		{
-			while (cur->table[i])
+			while (cur->filled < 50 && cur->table[i])
 				i++;
+			while (cur->filled >= 50 && cur->table[i])
+				i--;
 			cur->table[i] = size;
 			cur->filled++;
-			ret = cur->data + (i * SMALL_BYTES);
+			ret = (char *)cur + SMALL_ALLOC + (i * SMALL_BYTES);
 			break ;
 		}
 		cur = cur->next;
