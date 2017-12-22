@@ -46,6 +46,7 @@
 typedef struct		s_small
 {
 	struct s_small	*next;
+	struct s_small	*prev;
 	int				table[100];
 	int				filled;
 }					t_small;
@@ -57,6 +58,7 @@ typedef struct		s_small
 typedef struct		s_med
 {
 	struct s_med	*next;
+	struct s_med	*prev;
 	int				table[100];
 	int				filled;
 }					t_med;
@@ -64,6 +66,7 @@ typedef struct		s_med
 typedef struct		s_large
 {
 	struct s_large	*next;
+	struct s_large	*prev;
 	size_t			size;
 }					t_large;
 

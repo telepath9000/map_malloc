@@ -17,8 +17,11 @@ static void	init_mem(void)
 	g_mem = mmap(0, GLOBAL,
 				PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
 	g_mem->small = NULL;
+	g_mem->stail = NULL;
 	g_mem->med = NULL;
+	g_mem->mtail = NULL;
 	g_mem->large = NULL;
+	g_mem->ltail = NULL;
 	g_mem->ssize = 0;
 	g_mem->msize = 0;
 	g_mem->lsize = 0;
@@ -34,14 +37,17 @@ static void	init_chunk(void *memory, int type, size_t size)
 	if (!g_mem)
 		init_mem();
 	if (type == SMALL_BYTES && (((t_small *)memory)->table[0] = 1) &&
-			(((t_small *)memory)->filled = 1) && ++g_mem->ssize)
+			(((t_small *)memory)->filled = 1) && ++g_mem->ssize &&
+			(((t_small *)memory)->prev = NULL))
 		((t_small *)memory)->next = NULL;
 	if (type == MED_BYTES && (((t_med *)memory)->table[0] = 1) &&
-			(((t_med *)memory)->filled = 1) && ++g_mem->msize)
+			(((t_med *)memory)->filled = 1) && ++g_mem->msize &&
+			(((t_med *)memory)->prev = NULL))
 		((t_med *)memory)->next = NULL;
 	if (type == LARGE && ++g_mem->lsize)
 	{
 		((t_large *)memory)->next = NULL;
+		((t_large *)memory)->prev = NULL;
 		((t_large *)memory)->size = size;
 	}
 	while (type == SMALL_BYTES && ++i < 100)
@@ -50,28 +56,27 @@ static void	init_chunk(void *memory, int type, size_t size)
 		((t_med *)memory)->table[i] = 0;
 }
 
-
 static void	*insert_mem_ascending(void *ptr, int type)
 {
 	void	*tmp;
 
 	if (type == SMALL_BYTES && (tmp = (void *)g_mem->small))
 	{
-		while (((t_small *)tmp)->next && ptr < tmp)
+		while (((t_small *)tmp)->next && ptr > tmp)
 			tmp = ((t_small *)tmp)->next;
 		((t_small *)ptr)->next = ((t_small *)tmp)->next;
 		((t_small *)tmp)->next = (t_small *)ptr;
 	}
-	else if (type == MED_BYTES (tmp = (void *)g_mem->med))
+	else if (type == MED_BYTES && (tmp = (void *)g_mem->med))
 	{
-		while (((t_med *)tmp)->next && ptr < tmp)
+		while (((t_med *)tmp)->next && ptr > tmp)
 			tmp = ((t_med *)tmp)->next;
 		((t_med *)ptr)->next = ((t_med *)tmp)->next;
 		((t_med *)tmp)->next = (t_med *)ptr;
 	}
 	else if (type == LARGE && (tmp = (void *)g_mem->large))
 	{
-		while (((t_large *)tmp)->next && ptr < tmp)
+		while (((t_large *)tmp)->next && ptr > tmp)
 			tmp = ((t_large *)tmp)->next;
 		((t_large *)ptr)->next = ((t_large *)tmp)->next;
 		((t_large *)tmp)->next = (t_large *)ptr;
@@ -82,9 +87,11 @@ static void	*insert_mem_ascending(void *ptr, int type)
 static void	*place_memory(void *memory, int type, size_t size)
 {
 	void	*ptr;
+	void	*tmp;
 	int		check;
 
 	check = 0;
+	tmp = NULL;
 	init_chunk(memory, type, size);
 	(type == LARGE) ? set_limit(size, 1) : set_limit(type, 1);
 	if (type == LARGE && !g_mem->large && (check = 1))
@@ -100,7 +107,13 @@ static void	*place_memory(void *memory, int type, size_t size)
 	if (type == SMALL_BYTES)
 		ptr = (char *)memory + SMALL_ALLOC;
 	if (!check)
-		insert_mem_ascending(memory, type);
+		tmp = insert_mem_ascending(memory, type);
+	if (type == LARGE)
+		((t_large *)memory)->prev = (t_large *)tmp;
+	else if (type == MED_BYTES)
+		((t_med *)memory)->prev = (t_med *)tmp;
+	else if (type == SMALL_BYTES)
+		((t_small *)memory)->prev = (t_small *)tmp;
 	return (ptr);
 }
 
@@ -125,5 +138,11 @@ void		*alloc_core(size_t size)
 				MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
 	if (memory != (void *)-1)
 		ptr = place_memory(memory, type, size);
+	if (type == SMALL_BYTES && g_mem->stail && g_mem->stail->next == memory)
+		g_mem->stail = (t_small *)memory;
+	if (type == MED_BYTES && g_mem->mtail && g_mem->mtail->next == memory)
+		g_mem->mtail = (t_med *)memory;
+	if (type == LARGE && g_mem->ltail && g_mem->ltail->next == memory)
+		g_mem->ltail = (t_large *)memory;
 	return (ptr);
 }

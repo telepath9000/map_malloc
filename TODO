@@ -1,0 +1,5 @@
+TODO:
+
+		-have free decide whether to traverse in reverse or forward bsed on address.
+		-write hex conversion for pointer addresses.
+		-write address printing function
