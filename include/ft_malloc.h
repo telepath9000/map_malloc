@@ -26,9 +26,9 @@
 # define SIZES (sizeof(t_small *) + sizeof(t_large *) + sizeof(t_med *)) * 2
 # define GLOBAL SIZES + (sizeof(size_t) * 3) + sizeof(rlim_t)
 # define LARGE 1
-# define SMALL_ALLOC (sizeof(int) * 101) + sizeof(t_small *)
-# define MED_ALLOC (sizeof(int) * 101) + sizeof(t_med *)
-# define LARGE_ALLOC sizeof(int) + sizeof(t_large *)
+# define SMALL_ALLOC (sizeof(int) * 101) + (sizeof(t_small *) * 2)
+# define MED_ALLOC (sizeof(int) * 101) + (sizeof(t_med *) * 2)
+# define LARGE_ALLOC sizeof(int) + (sizeof(t_large *) * 2)
 
 /*
 **	Possibly store pointer list indeces in hash table contained in g_mem,
@@ -70,8 +70,11 @@ typedef struct		s_large
 typedef struct		s_mem
 {
 	t_small			*small;
+	t_small			*stail;
 	t_med			*med;
+	t_med			*mtail;
 	t_large			*large;
+	t_large			*ltail;
 	size_t			ssize;
 	size_t			msize;
 	size_t			lsize;
