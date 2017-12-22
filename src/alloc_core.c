@@ -44,41 +44,39 @@ static void	init_chunk(void *memory, int type, size_t size)
 		((t_large *)memory)->next = NULL;
 		((t_large *)memory)->size = size;
 	}
-	while (type == SMALL_BYTES && ++i < 13)
+	while (type == SMALL_BYTES && ++i < 100)
 		((t_small *)memory)->table[i] = 0;
-	while (type == MED_BYTES && ++i < 13)
+	while (type == MED_BYTES && ++i < 100)
 		((t_med *)memory)->table[i] = 0;
 }
 
 
-static void	insert_mem_ascending(void *ptr, int type)
+static void	*insert_mem_ascending(void *ptr, int type)
 {
 	void	*tmp;
 
-	if (type == SMALL_BYTES)
+	if (type == SMALL_BYTES && (tmp = (void *)g_mem->small))
 	{
-		tmp = g_mem->small;
 		while (((t_small *)tmp)->next && ptr < tmp)
 			tmp = ((t_small *)tmp)->next;
 		((t_small *)ptr)->next = ((t_small *)tmp)->next;
 		((t_small *)tmp)->next = (t_small *)ptr;
 	}
-	else if (type == MED_BYTES)
+	else if (type == MED_BYTES (tmp = (void *)g_mem->med))
 	{
-		tmp = g_mem->med;
 		while (((t_med *)tmp)->next && ptr < tmp)
 			tmp = ((t_med *)tmp)->next;
 		((t_med *)ptr)->next = ((t_med *)tmp)->next;
 		((t_med *)tmp)->next = (t_med *)ptr;
 	}
-	else if (type == LARGE)
+	else if (type == LARGE && (tmp = (void *)g_mem->large))
 	{
-		tmp = g_mem->large;
 		while (((t_large *)tmp)->next && ptr < tmp)
 			tmp = ((t_large *)tmp)->next;
 		((t_large *)ptr)->next = ((t_large *)tmp)->next;
 		((t_large *)tmp)->next = (t_large *)ptr;
 	}
+	return (tmp);
 }
 
 static void	*place_memory(void *memory, int type, size_t size)
