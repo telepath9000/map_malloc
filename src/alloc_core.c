@@ -48,6 +48,7 @@ static void	init_chunk(void *memory, int type, size_t size)
 		((t_large *)memory)->next = NULL;
 		((t_large *)memory)->prev = NULL;
 		((t_large *)memory)->size = size;
+		printf("%li\n", ((t_large *)memory)->size);
 	}
 	while (type == SMALL_BYTES && ++i < 100)
 		((t_small *)memory)->table[i] = 0;
@@ -123,16 +124,14 @@ void		*alloc_core(size_t size)
 	int		type;
 	int		total;
 
-	if ((total = get_alloc_size(size)) && size > MED_BYTES && (type = LARGE))
-		memory = mmap(0, total, PROT_READ | PROT_WRITE,
-				MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
-	else if (size <= MED_BYTES && size > SMALL_BYTES &&
-			(type = MED_BYTES))
-		memory = mmap(0, total, PROT_READ | PROT_WRITE,
-				MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
-	else if ((type = SMALL_BYTES))
-		memory = mmap(0, total, PROT_READ | PROT_WRITE,
-				MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
+	if ((total = get_alloc_size(size)) && size > MED_BYTES)
+		type = LARGE;
+	else if (size <= MED_BYTES && size > SMALL_BYTES)
+		type = MED_BYTES;
+	else
+		type = SMALL_BYTES;
+	memory = mmap(0, total, PROT_READ | PROT_WRITE,
+			MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
 	if ((ptr = place_memory(memory, type, size)) && type == SMALL_BYTES &&
 			((g_mem->stail && g_mem->stail->next == memory) || !g_mem->stail))
 		g_mem->stail = (t_small *)memory;
