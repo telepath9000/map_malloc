@@ -14,14 +14,9 @@
 
 void	set_limit(size_t type, size_t inc)
 {
-	size_t	page;
-
-	page = getpagesize();
 	if (inc)
 	{
-		if (type == GLOBAL)
-			g_mem->total_mem += (rlim_t)(((GLOBAL / page) * page) + page);
-		else if (type == SMALL_BYTES)
+		if (type == SMALL_BYTES)
 			g_mem->total_mem += (rlim_t)get_alloc_size(SMALL_BYTES);
 		else if (type == MED_BYTES)
 			g_mem->total_mem += (rlim_t)get_alloc_size(MED_BYTES);
@@ -83,12 +78,12 @@ size_t	get_alloc_size(size_t size)
 	ret = 0;
 	page = getpagesize();
 	if (size <= SMALL_BYTES)
-		ret = ((256 * 100) > page) ? 
-			((((256 * 100) / page) * page) +
+		ret = ((SMALL_BYTES * 100) > page) ? 
+			((((SMALL_BYTES * 100) / page) * page) +
 			page) + SMALL_ALLOC : page;
 	else if (size > SMALL_BYTES && size <= MED_BYTES)
-		ret = ((512 * 100) > page) ? 
-			((((512 * 100) / page) * page) +
+		ret = ((MED_BYTES * 100) > page) ? 
+			((((MED_BYTES * 100) / page) * page) +
 			page) + MED_ALLOC : page;
 	else if (size > MED_BYTES)
 		ret = (size > page) ?

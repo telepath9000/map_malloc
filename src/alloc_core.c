@@ -25,8 +25,7 @@ static void	init_mem(void)
 	g_mem->ssize = 0;
 	g_mem->msize = 0;
 	g_mem->lsize = 0;
-	g_mem->total_mem = 0;
-	set_limit(GLOBAL, 1);
+	g_mem->total_mem = getpagesize();
 }
 
 static void	init_chunk(void *memory, int type, size_t size)
@@ -36,11 +35,11 @@ static void	init_chunk(void *memory, int type, size_t size)
 	i = 0;
 	if (!g_mem)
 		init_mem();
-	if (type == SMALL_BYTES && (((t_small *)memory)->table[0] = 1) &&
+	if (type == SMALL_BYTES && (((t_small *)memory)->table[0] = size) &&
 			(((t_small *)memory)->filled = 1) && ++g_mem->ssize &&
 			(((t_small *)memory)->prev = NULL))
 		((t_small *)memory)->next = NULL;
-	if (type == MED_BYTES && (((t_med *)memory)->table[0] = 1) &&
+	if (type == MED_BYTES && (((t_med *)memory)->table[0] = size) &&
 			(((t_med *)memory)->filled = 1) && ++g_mem->msize &&
 			(((t_med *)memory)->prev = NULL))
 		((t_med *)memory)->next = NULL;
@@ -124,9 +123,7 @@ void		*alloc_core(size_t size)
 	int		type;
 	int		total;
 
-	memory = NULL;
-	total = get_alloc_size(size);
-	if (size > MED_BYTES && (type = LARGE))
+	if ((total = get_alloc_size(size)) && size > MED_BYTES && (type = LARGE))
 		memory = mmap(0, total, PROT_READ | PROT_WRITE,
 				MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
 	else if (size <= MED_BYTES && size > SMALL_BYTES &&
@@ -136,13 +133,14 @@ void		*alloc_core(size_t size)
 	else if ((type = SMALL_BYTES))
 		memory = mmap(0, total, PROT_READ | PROT_WRITE,
 				MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
-	if (memory != (void *)-1)
-		ptr = place_memory(memory, type, size);
-	if (type == SMALL_BYTES && g_mem->stail && g_mem->stail->next == memory)
+	if ((ptr = place_memory(memory, type, size)) && type == SMALL_BYTES &&
+			((g_mem->stail && g_mem->stail->next == memory) || !g_mem->stail))
 		g_mem->stail = (t_small *)memory;
-	if (type == MED_BYTES && g_mem->mtail && g_mem->mtail->next == memory)
+	if (type == MED_BYTES && ((g_mem->mtail && g_mem->mtail->next == memory) ||
+				!g_mem->mtail))
 		g_mem->mtail = (t_med *)memory;
-	if (type == LARGE && g_mem->ltail && g_mem->ltail->next == memory)
+	if (type == LARGE && ((g_mem->ltail && g_mem->ltail->next == memory) ||
+				!g_mem->ltail))
 		g_mem->ltail = (t_large *)memory;
 	return (ptr);
 }

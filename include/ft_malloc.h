@@ -21,8 +21,8 @@
 
 #include <stdio.h>
 
-# define SMALL_BYTES 256
-# define MED_BYTES 512
+# define SMALL_BYTES 1024
+# define MED_BYTES 4096
 # define SIZES (sizeof(t_small *) + sizeof(t_large *) + sizeof(t_med *)) * 2
 # define GLOBAL SIZES + (sizeof(size_t) * 3) + sizeof(rlim_t)
 # define LARGE 1
