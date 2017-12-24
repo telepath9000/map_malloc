@@ -60,12 +60,9 @@ static void	print_small_alloc(t_small *node)
 	t_small	*n;
 	int		checked;
 	int		i;
-	int count;
 
-	count = 0;
 	while (node && (i = -1) && !(checked = 0))
 	{
-		printf("count is :%i\n", count);
 		while (++i < 100 && checked < node->filled)
 			if (node->table[i] && (n = ((t_small *)(char *)node + SMALL_ALLOC +
 					(i * SMALL_BYTES))) && ++checked)
@@ -81,7 +78,6 @@ static void	print_small_alloc(t_small *node)
 				write(1, " bytes", 6);
 			}
 		node = node->prev;
-		count++;
 	}
 	write(1, "\n", 1);
 }
