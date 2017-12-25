@@ -12,7 +12,7 @@
 
 #include "../include/ft_malloc.h"
 
-static void	print_base(size_t val, int base)
+/*static void	print_base(size_t val, int base)
 {
 	size_t	size;
 	size_t	tmp;
@@ -108,18 +108,33 @@ static void	print_med_alloc(t_med *node)
 		node = node->prev;
 	}
 	write(1, "\n", 1);
-}
+}*/
 
 
 void	show_alloc_mem(void)
 {
 	t_small	*scur;
-	t_med	*mcur;
-	t_large	*lcur;
+//	t_med	*mcur;
+//	t_large	*lcur;
 
 	if (g_mem)
 	{
-		scur = g_mem->stail;
+		scur = g_mem->small;
+		for (size_t i = 0; i < g_mem->ssize - 1; i++)
+		{
+			printf("it: %li\n", i);
+			if (scur->next)
+				printf("GOOD\n");
+			scur = scur->next;
+		}
+		for (size_t i = g_mem->ssize - 1; i > 0; i--)
+		{
+			printf("revit: %li\n", i);
+			if (scur->table[0])
+				printf("REVGOOD\n");
+			scur = scur->prev;
+		}
+	/*	scur = g_mem->stail;
 		mcur = g_mem->mtail;
 		lcur = g_mem->ltail;
 		write(1, "TINY : ", 7);
@@ -133,7 +148,7 @@ void	show_alloc_mem(void)
 		print_large_alloc(lcur);
 		write(1, "\nTotal : ", 8);
 		print_base(g_mem->total_mem, 10);
-		write(1, " bytes\n\n", 7);
+		write(1, " bytes\n\n", 7);*/
 	}
 	else
 		write(1, "No memory has been allocated.\n", 30);

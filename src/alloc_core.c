@@ -48,7 +48,6 @@ static void	init_chunk(void *memory, int type, size_t size)
 		((t_large *)memory)->next = NULL;
 		((t_large *)memory)->prev = NULL;
 		((t_large *)memory)->size = size;
-		printf("%li\n", ((t_large *)memory)->size);
 	}
 	while (type == SMALL_BYTES && ++i < 100)
 		((t_small *)memory)->table[i] = 0;
@@ -60,7 +59,7 @@ static void	*insert_mem_ascending(void *ptr, int type)
 {
 	void	*tmp;
 
-	if (type == SMALL_BYTES && (tmp = (void *)g_mem->small))
+/*	if (type == SMALL_BYTES && (tmp = (void *)g_mem->small))
 	{
 		while (((t_small *)tmp)->next && ptr > tmp)
 			tmp = ((t_small *)tmp)->next;
@@ -81,8 +80,36 @@ static void	*insert_mem_ascending(void *ptr, int type)
 		((t_large *)ptr)->next = ((t_large *)tmp)->next;
 		((t_large *)tmp)->next = (t_large *)ptr;
 	}
+	return (tmp);*/
+
+	if (type == SMALL_BYTES && (tmp = (void *)g_mem->small))
+		while (((t_small *)tmp)->next && ptr > tmp)
+			tmp = ((t_small *)tmp)->next;
+	else if (type == MED_BYTES && (tmp = (void *)g_mem->med))
+		while (((t_med *)tmp)->next && ptr > tmp)
+			tmp = ((t_med *)tmp)->next;
+	else if (type == LARGE && (tmp = (void *)g_mem->large))
+		while (((t_large *)tmp)->next && ptr > tmp)
+			tmp = ((t_large *)tmp)->next;
+	if (type == SMALL_BYTES && (((t_small *)ptr)->next =
+		((t_small *)tmp)->next) && (((t_small *)tmp)->next = (t_small *)ptr)
+		&& ((t_small *)ptr)->next)
+		((t_small *)ptr)->next->prev = (t_small *)ptr;
+	if (type == MED_BYTES && (((t_med *)ptr)->next =
+		((t_med *)tmp)->next) && (((t_med *)tmp)->next = (t_med *)ptr)
+			&& ((t_med *)ptr)->next)
+		((t_med *)ptr)->next->prev = (t_med *)ptr;
+	if (type == LARGE  && (((t_large *)ptr)->next =
+		((t_large *)tmp)->next) && (((t_large *)tmp)->next = (t_large *)ptr)
+			&& ((t_large *)ptr)->next)
+		((t_large *)ptr)->next->prev = (t_large *)ptr;
 	return (tmp);
 }
+
+/*
+**	this function is a great example of how janky this code is
+**	I really should revise everything
+*/
 
 static void	*place_memory(void *memory, int type, size_t size)
 {
@@ -114,6 +141,9 @@ static void	*place_memory(void *memory, int type, size_t size)
 		((t_med *)memory)->prev = (t_med *)tmp;
 	else if (type == SMALL_BYTES)
 		((t_small *)memory)->prev = (t_small *)tmp;
+	//example of how to set the head of the list again
+	if (type == LARGE && !tmp)
+		g_mem->large = memory;
 	return (ptr);
 }
 
@@ -141,5 +171,11 @@ void		*alloc_core(size_t size)
 	if (type == LARGE && ((g_mem->ltail && g_mem->ltail->next == memory) ||
 				!g_mem->ltail))
 		g_mem->ltail = (t_large *)memory;
+	if (type == LARGE)
+		printf("\nlsize := %li\ncheck g_mem: %li",
+				g_mem->lsize,
+				g_mem->large->size);
+	if (type == LARGE && ((t_large *)memory)->prev)
+		printf("mem->prev->size := %li", ((t_large *)memory)->size);
 	return (ptr);
 }
