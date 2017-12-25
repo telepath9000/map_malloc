@@ -12,23 +12,7 @@
 
 #include "../include/ft_malloc.h"
 
-static void	init_mem(void)
-{
-	g_mem = mmap(0, GLOBAL,
-				PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
-	g_mem->small = NULL;
-	g_mem->stail = NULL;
-	g_mem->med = NULL;
-	g_mem->mtail = NULL;
-	g_mem->large = NULL;
-	g_mem->ltail = NULL;
-	g_mem->ssize = 0;
-	g_mem->msize = 0;
-	g_mem->lsize = 0;
-	g_mem->total_mem = getpagesize();
-}
-
-static void	init_chunk(void *memory, int type, size_t size)
+/*static void	init_chunk(void *memory, int type, size_t size)
 {
 	int	i;
 
@@ -59,7 +43,7 @@ static void	*insert_mem_ascending(void *ptr, int type)
 {
 	void	*tmp;
 
-/*	if (type == SMALL_BYTES && (tmp = (void *)g_mem->small))
+	if (type == SMALL_BYTES && (tmp = (void *)g_mem->small))
 	{
 		while (((t_small *)tmp)->next && ptr > tmp)
 			tmp = ((t_small *)tmp)->next;
@@ -80,7 +64,7 @@ static void	*insert_mem_ascending(void *ptr, int type)
 		((t_large *)ptr)->next = ((t_large *)tmp)->next;
 		((t_large *)tmp)->next = (t_large *)ptr;
 	}
-	return (tmp);*/
+	return (tmp);
 
 	if (type == SMALL_BYTES && (tmp = (void *)g_mem->small))
 		while (((t_small *)tmp)->next && ptr > tmp)
@@ -106,10 +90,10 @@ static void	*insert_mem_ascending(void *ptr, int type)
 	return (tmp);
 }
 
-/*
+*
 **	this function is a great example of how janky this code is
 **	I really should revise everything
-*/
+*
 
 static void	*place_memory(void *memory, int type, size_t size)
 {
@@ -142,8 +126,12 @@ static void	*place_memory(void *memory, int type, size_t size)
 	else if (type == SMALL_BYTES)
 		((t_small *)memory)->prev = (t_small *)tmp;
 	//example of how to set the head of the list again
-	if (type == LARGE && !tmp)
-		g_mem->large = memory;
+	if (type == LARGE && (t_large *)tmp == g_mem->large)
+		g_mem->large = (t_large *)memory;
+	else if (type == MED_BYTES && (t_med *)tmp == g_mem->med)
+		g_mem->med = (t_med *)memory;
+	else if (type == SMALL_BYTES && (t_small *)tmp == g_mem->small)
+		g_mem->small = (t_small *)memory;
 	return (ptr);
 }
 
@@ -178,4 +166,77 @@ void		*alloc_core(size_t size)
 	if (type == LARGE && ((t_large *)memory)->prev)
 		printf("mem->prev->size := %li", ((t_large *)memory)->size);
 	return (ptr);
+}*/
+
+static void	insert_chunk(void *chunk, size_t type)
+{
+	void	*tmp;
+
+	tmp = find_slot(chunk, type);
+	if (type == SMALL_BYTES)
+	{
+		((t_small *)tmp)->next = (t_small *)chunk;
+		((t_small *)chunk)->prev = (t_small *)tmp;
+		if (((t_small *)chunk)->next)
+			((t_small *)chunk)->next->prev = (t_small *)chunk;
+	}
+	else if (type == MED_BYTES)
+	{
+		((t_med *)tmp)->next = (t_med *)chunk;
+		((t_med *)chunk)->prev = (t_med *)tmp;
+		if (((t_med *)chunk)->next)
+			((t_med *)chunk)->next->prev = (t_med *)chunk;
+	}
+	else
+	{
+		((t_large *)tmp)->next = (t_large *)chunk;
+		((t_large *)chunk)->prev = (t_large *)tmp;
+		if (((t_large *)chunk)->next)
+			((t_large *)chunk)->next->prev = (t_large *)chunk;
+	}
+}
+
+static int	set_initial(void *chunk, size_t type)
+{
+	int check;
+
+	check = 0;
+	if (type == SMALL_BYTES && !g_mem->small && (check = 1))
+		g_mem->small = (t_small *)chunk;
+	else if (type == MED_BYTES && !g_mem->med && (check = 1))
+		g_mem->med = (t_med *)chunk;
+	else if (!g_mem->large && (check = 1))
+		g_mem->large = (t_large *)chunk;
+	if (!check && type == SMALL_BYTES && (t_small *)chunk > g_mem->small &&
+			(((t_small *)chunk)->next = g_mem->small) &&
+			(g_mem->small->prev = (t_small *)chunk) && (check = 1))
+		g_mem->small = (t_small *)chunk;
+	else if (!check && type == MED_BYTES && (t_med *)chunk > g_mem->med &&
+			(((t_med *)chunk)->next = g_mem->med) &&
+			(g_mem->med->prev = (t_med *)chunk) && (check = 1))
+		g_mem->med = (t_med *)chunk;
+	else if (!check && (t_large *)chunk > g_mem->large &&
+			(((t_large *)chunk)->next = g_mem->large) &&
+			(g_mem->large->prev = (t_large *)chunk) && (check = 1))
+		g_mem->large = (t_large *)chunk;
+	return (check);
+}
+
+void		*alloc_core(size_t size)
+{
+	void	*ret;
+	void	*chunk;
+	size_t	type;
+	size_t	total;
+
+	type = get_type(size);
+	total = get_alloc_size(size);
+	chunk = mmap(0, total, PROT_READ | PROT_WRITE,
+			MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
+	ret = init_chunk(chunk, type);
+	add_to_size(type);
+	if (!set_initial(chunk, type))
+		insert_chunk(chunk, type);
+	set_tail(chunk, type);
+	return (ret);
 }

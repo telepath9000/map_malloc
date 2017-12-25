@@ -89,7 +89,6 @@ extern t_mem		*g_mem;
 void				ft_free(void *ptr);
 void				free_core(void *prev, void *target, int type);
 
-
 void				*ft_malloc(size_t size);
 
 void				*ft_realloc(void *ptr, size_t size);
@@ -107,5 +106,13 @@ int					check_limit(size_t size);
 int					error_handle_munmap(void *target, size_t size);
 void				set_limit(size_t type, size_t inc);
 void				malcpy(void *dest, void *src, size_t ref_len, size_t len);
+
+size_t				get_type(size_t size);
+void				*init_chunk(void *mem, size_t type);
+void				set_tail(void *chunk, size_t type);
+void				*find_slot(void *chunk, size_t type);
+
+void				add_to_size(size_t type);
+size_t				get_type(size_t size);
 
 #endif

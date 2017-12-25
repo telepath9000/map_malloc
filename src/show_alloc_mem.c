@@ -113,26 +113,26 @@ static void	print_med_alloc(t_med *node)
 
 void	show_alloc_mem(void)
 {
-	t_small	*scur;
+//	t_small	*scur;
 //	t_med	*mcur;
-//	t_large	*lcur;
+	t_large	*lcur;
 
 	if (g_mem)
 	{
-		scur = g_mem->small;
-		for (size_t i = 0; i < g_mem->ssize - 1; i++)
+		lcur = g_mem->large;
+		for (size_t i = 0; i < g_mem->lsize - 1; i++)
 		{
 			printf("it: %li\n", i);
-			if (scur->next)
+			if (lcur->next)
 				printf("GOOD\n");
-			scur = scur->next;
+			lcur = lcur->next;
 		}
-		for (size_t i = g_mem->ssize - 1; i > 0; i--)
+		for (size_t i = g_mem->lsize - 1; i > 0; i--)
 		{
 			printf("revit: %li\n", i);
-			if (scur->table[0])
+			if (lcur->prev)
 				printf("REVGOOD\n");
-			scur = scur->prev;
+			lcur = lcur->prev;
 		}
 	/*	scur = g_mem->stail;
 		mcur = g_mem->mtail;
