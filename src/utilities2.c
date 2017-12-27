@@ -12,8 +12,10 @@
 
 #include "../include/ft_malloc.h"
 
-void	add_to_size(size_t type)
+void	add_to_size(size_t type, size_t size)
 {
+
+	g_mem->total_mem += size;
 	if (type == SMALL_BYTES)
 		g_mem->ssize++;
 	else if (type == MED_BYTES)

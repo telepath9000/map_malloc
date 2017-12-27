@@ -12,7 +12,7 @@
 
 #include "../include/ft_malloc.h"
 
-/*static void	print_base(size_t val, int base)
+static void	print_base(size_t val, int base)
 {
 	size_t	size;
 	size_t	tmp;
@@ -108,47 +108,32 @@ static void	print_med_alloc(t_med *node)
 		node = node->prev;
 	}
 	write(1, "\n", 1);
-}*/
+}
 
 
 void	show_alloc_mem(void)
 {
-//	t_small	*scur;
-//	t_med	*mcur;
+	t_small	*scur;
+	t_med	*mcur;
 	t_large	*lcur;
 
 	if (g_mem)
 	{
-		lcur = g_mem->large;
-		for (size_t i = 0; i < g_mem->lsize - 1; i++)
-		{
-			printf("it: %li\n", i);
-			if (lcur->next)
-				printf("GOOD\n");
-			lcur = lcur->next;
-		}
-		for (size_t i = g_mem->lsize - 1; i > 0; i--)
-		{
-			printf("revit: %li\n", i);
-			if (lcur->prev)
-				printf("REVGOOD\n");
-			lcur = lcur->prev;
-		}
-	/*	scur = g_mem->stail;
+		scur = g_mem->stail;
 		mcur = g_mem->mtail;
 		lcur = g_mem->ltail;
-		write(1, "TINY : ", 7);
-		print_base((size_t)(&(*scur)), 16);
-		print_small_alloc(scur);
-		write(1, "SMALL : ", 8);
-		print_base((size_t)(&(*mcur)), 16);
-		print_med_alloc(mcur);
-		write(1, "LARGE : ", 8);
-		print_base((size_t)(&(*lcur)), 16);
-		print_large_alloc(lcur);
+		scur ? write(1, "TINY : ", 7) : 0;
+		scur ? print_base((size_t)(&(*scur)), 16) : 0;
+		scur ? print_small_alloc(scur) : 0;
+		mcur ? write(1, "SMALL : ", 8) : 0;
+		mcur ? print_base((size_t)(&(*mcur)), 16) : 0;
+		mcur ? print_med_alloc(mcur) : 0;
+		lcur ? write(1, "LARGE : ", 8) : 0;
+		lcur ? print_base((size_t)(&(*lcur)), 16) : 0;
+		lcur ? print_large_alloc(lcur) : 0;
 		write(1, "\nTotal : ", 8);
 		print_base(g_mem->total_mem, 10);
-		write(1, " bytes\n\n", 7);*/
+		write(1, " bytes\n\n", 7);
 	}
 	else
 		write(1, "No memory has been allocated.\n", 30);

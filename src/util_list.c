@@ -25,29 +25,29 @@ static void	init_mem(void)
 	g_mem->ssize = 0;
 	g_mem->msize = 0;
 	g_mem->lsize = 0;
-	g_mem->total_mem = getpagesize();
+	g_mem->total_mem = 0;
 }
 
 void	*find_slot(void *chunk, size_t type)
 {
 	void	*ret;
 
-	if (type == SMALL_BYTES && ((t_small *)ret = g_mem->small))
+	if (type == SMALL_BYTES && (ret = g_mem->small))
 	{
 		while (((t_small *)ret)->next && chunk > ret)
-			(t_small *)ret = ((t_small *)ret)->next;
+			ret = ((t_small *)ret)->next;
 		((t_small *)chunk)->next = ((t_small *)ret)->next;
 	}
-	else if (type == MED_BYTES && ((t_med *)ret = g_mem->med))
+	else if (type == MED_BYTES && (ret = g_mem->med))
 	{
 		while (((t_med *)ret)->next && chunk > ret)
-			(t_med *)ret = ((t_med *)ret)->next;
+			ret = ((t_med *)ret)->next;
 		((t_med *)chunk)->next = ((t_med *)ret)->next;
 	}
-	else if (((t_large *)ret = g_mem->large))
+	else if ((ret = g_mem->large))
 	{
 		while (((t_large *)ret)->next && chunk > ret)
-			(t_large *)ret = ((t_large *)ret)->next;
+			ret = ((t_large *)ret)->next;
 		((t_large *)chunk)->next = ((t_large *)ret)->next;
 	}
 	return (ret);

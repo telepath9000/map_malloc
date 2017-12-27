@@ -28,7 +28,7 @@
 # define LARGE 1
 # define SMALL_ALLOC (sizeof(int) * 101) + (sizeof(t_small *) * 2)
 # define MED_ALLOC (sizeof(int) * 101) + (sizeof(t_med *) * 2)
-# define LARGE_ALLOC sizeof(int) + (sizeof(t_large *) * 2)
+# define LARGE_ALLOC sizeof(size_t) + (sizeof(t_large *) * 2)
 
 /*
 **	Possibly store pointer list indeces in hash table contained in g_mem,
@@ -112,7 +112,7 @@ void				*init_chunk(void *mem, size_t type);
 void				set_tail(void *chunk, size_t type);
 void				*find_slot(void *chunk, size_t type);
 
-void				add_to_size(size_t type);
+void				add_to_size(size_t type, size_t size);
 size_t				get_type(size_t size);
 
 #endif
