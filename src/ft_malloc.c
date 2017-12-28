@@ -14,12 +14,6 @@
 
 t_mem		*g_mem = NULL;
 
-/*
-**	Will implement different data structures for small and
-**	medium sizes later, this is why they
-**	are seperate typedef's.
-*/
-
 static void	*search_memory_med(int size)
 {
 	void	*ret;

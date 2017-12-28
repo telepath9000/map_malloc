@@ -1,9 +1,0 @@
-TODO:
-
-		-have free decide whether to traverse in reverse or forward bsed on address.
-		-total_mem variable seems to be updated incorrectly.
-		
-		___PRIORITY_BUGS___
-
-
-	--- Prev in each node is not being linked correctly. ---

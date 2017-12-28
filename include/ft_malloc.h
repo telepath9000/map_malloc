@@ -30,19 +30,6 @@
 # define MED_ALLOC (sizeof(int) * 101) + (sizeof(t_med *) * 2)
 # define LARGE_ALLOC sizeof(size_t) + (sizeof(t_large *) * 2)
 
-/*
-**	Possibly store pointer list indeces in hash table contained in g_mem,
-**	one table for each size
-** 
-**	Storing pointer positions in an array of long ints with binary
-**	values representing filled or not
-**
-**	For medium size posibly use trie? binary tree with binary representation?
-**
-**	consider making the three diferrent structs an array of the same kind of
-**	linked list that is allocated for diferent sizes
-*/
-
 typedef struct		s_small
 {
 	struct s_small	*next;
@@ -50,10 +37,6 @@ typedef struct		s_small
 	int				table[100];
 	int				filled;
 }					t_small;
-
-/*
-** possibly turn med into a tree structure
-*/
 
 typedef struct		s_med
 {
@@ -98,7 +81,7 @@ void				show_alloc_mem(void);
 void				*alloc_core(size_t size);
 
 /*
-** utilities.c
+** utilities
 */
 
 size_t				get_alloc_size(size_t size);

@@ -51,11 +51,6 @@ int		error_handle_munmap(void *target, size_t size)
 	return (0);
 }
 
-/*
-**	In the future, I should add a cache for the page values and
-**	set them in the global struct
-*/
-
 int		check_limit(size_t size)
 {
 	struct rlimit	rlim;
