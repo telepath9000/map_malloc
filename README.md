@@ -10,15 +10,15 @@ Memory spaces are pre-cached in chunks based on size to avoid numerous requests 
 
 `void	*map_malloc(size_t size);`
 
-Returns a pointer to a newly reserved memory space of size *size* in bytes.
+Returns a pointer to a newly reserved memory space of size *size* in bytes. Returns a `NULL` pointer on failure.
 
 `void	map_free(void *ptr);`
 
-Removes the address
+Frees the reserved address pointed to by *ptr*. Accepts `Null` value pointers.
 
 `void	*map_realloc(void *ptr, size_t size);`
 
-Takes the pointer *ptr* and returns address of new memory space of size *size*. The contents of *ptr* are copied up to *size* in the new memory space.
+Takes the pointer *ptr* and returns address of new memory space of size *size*. The contents of *ptr* are copied up to *size* in the new memory space. Returns `NULL` on failure.
 
 `void	show_alloc_mem(void);`
 
