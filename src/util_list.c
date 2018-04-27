@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../include/ft_malloc.h"
+#include "../include/map_malloc.h"
 
 static void	init_mem(void)
 {

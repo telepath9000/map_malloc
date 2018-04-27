@@ -1,7 +1,7 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_malloc.h                                        :+:      :+:    :+:   */
+/*   wd_malloc.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: wdebs <marvin@42.fr>                       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
@@ -10,16 +10,14 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef FT_MALLOC_H
-# define FT_MALLOC_H
+#ifndef MAP_MALLOC_H
+# define MAP_MALLOC_H
 
 # include <sys/mman.h>
 # include <unistd.h>
 # include <sys/resource.h>
 # include <limits.h>
 # include <sys/time.h>
-
-#include <stdio.h>
 
 # define SMALL_BYTES 1024
 # define MED_BYTES 4096
@@ -69,12 +67,12 @@ typedef struct		s_mem
 
 extern t_mem		*g_mem;
 
-void				ft_free(void *ptr);
+void				map_free(void *ptr);
 void				free_core(void *prev, void *target, int type);
 
-void				*ft_malloc(size_t size);
+void				*map_malloc(size_t size);
 
-void				*ft_realloc(void *ptr, size_t size);
+void				*map_realloc(void *ptr, size_t size);
 
 void				show_alloc_mem(void);
 

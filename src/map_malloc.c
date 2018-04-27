@@ -1,7 +1,7 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_malloc.c                                        :+:      :+:    :+:   */
+/*   map_malloc.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: wdebs <marvin@42.fr>                       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../include/ft_malloc.h"
+#include "../include/map_malloc.h"
 
 t_mem		*g_mem = NULL;
 
@@ -68,7 +68,7 @@ static void	*search_memory_small(int size)
 	return (ret);
 }
 
-void		*ft_malloc(size_t size)
+void		*map_malloc(size_t size)
 {
 	void	*ptr;
 

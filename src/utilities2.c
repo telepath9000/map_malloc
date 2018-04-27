@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../include/ft_malloc.h"
+#include "../include/map_malloc.h"
 
 void	add_to_size(size_t type, size_t size)
 {

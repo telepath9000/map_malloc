@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../include/ft_malloc.h"
+#include "../include/map_malloc.h"
 
 void	set_limit(size_t type, size_t inc)
 {

@@ -1,7 +1,7 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_realloc.c                                        :+:      :+:    :+:  */
+/*   map_realloc.c                                       :+:      :+:    :+:  */
 /*                                                    +:+ +:+         +:+     */
 /*   By: wdebs <marvin@42.fr>                       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../include/ft_malloc.h"
+#include "../include/map_malloc.h"
 
 static size_t	check_large(void *ptr, size_t size)
 {
@@ -98,7 +98,7 @@ static size_t	check_small(void *ptr, size_t size)
 	return (ret);
 }
 
-void		*ft_realloc(void *ptr, size_t size)
+void		*map_realloc(void *ptr, size_t size)
 {
 	void	*ret;
 	size_t	ref_size;
@@ -109,7 +109,7 @@ void		*ft_realloc(void *ptr, size_t size)
 			 size <= MED_BYTES) ||
 			((ref_size = check_large(ptr, size)) && size > MED_BYTES))
 	{
-		ret = ft_malloc(size);
+		ret = map_malloc(size);
 		malcpy(ret, ptr, ref_size, size);
 	}
 	return (ret);

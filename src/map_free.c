@@ -1,7 +1,7 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_free.c                                          :+:      :+:    :+:   */
+/*   map_free.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: wdebs <marvin@42.fr>                       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../include/ft_malloc.h"
+#include "../include/map_malloc.h"
 
 void		free_core(void *prev, void *target, int type)
 {
@@ -122,7 +122,7 @@ static int	free_small(void *ptr)
 	return (ret);
 }
 
-void		ft_free(void *ptr)
+void		map_free(void *ptr)
 {
 	if (ptr && g_mem)
 	{
