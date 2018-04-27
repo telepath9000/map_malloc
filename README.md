@@ -8,19 +8,19 @@ Memory spaces are pre-cached in chunks based on size to avoid numerous requests 
 
 ## Usage
 
-*void	\**map_malloc(size_t size);*
+`void	*map_malloc(size_t size);`
 
 Returns a pointer to a newly reserved memory space of size *size* in bytes.
 
-*void	map\_free(void \**ptr);*
+`void	map_free(void *ptr);`
 
 Removes the address
 
-*void	\**map_realloc(void \**ptr, size_t size);*
+`void	*map_realloc(void *ptr, size_t size);`
 
 Takes the pointer *ptr* and returns address of new memory space of size *size*. The contents of *ptr* are copied up to *size* in the new memory space.
 
-*void	show_alloc_mem(void);*
+`void	show_alloc_mem(void);`
 
 Displays all memory that is currently being managed by map\_malloc.
 
@@ -28,22 +28,22 @@ Displays all memory that is currently being managed by map\_malloc.
 
 Run
 
-*make*
+`make`
 
 in the repo directroy to build shared library file.
 
 Alternatively, to install system-wide run
 
-*sudo make install*
+`sudo make install`
 
 in the repo directory.
 
 Once installed, in order to compile with the library use
 
--lmap\_malloc$(uname -m)\_$(uname -s)
+`-lmap_malloc$(uname -m)_$(uname -s)`
 
 as a compile flag and include library with
 
-\#include \<map_malloc.h\>
+`#include <map_malloc.h>`
 
 in the target source files.
