@@ -14,7 +14,7 @@ Returns a pointer to a newly reserved memory space of size *size* in bytes. Retu
 
 `void	map_free(void *ptr);`
 
-Frees the reserved address pointed to by *ptr*. Accepts `Null` value pointers.
+Frees the reserved address pointed to by *ptr*. Accepts `NULL` value pointers.
 
 `void	*map_realloc(void *ptr, size_t size);`
 
