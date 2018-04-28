@@ -26,24 +26,8 @@ Displays all memory that is currently being managed by map\_malloc.
 
 # Install
 
-Run
+Run `make` in the repo directroy to build shared library file.
 
-`make`
+Alternatively, to install system-wide run `sudo make install` in the repo directory.
 
-in the repo directroy to build shared library file.
-
-Alternatively, to install system-wide run
-
-`sudo make install`
-
-in the repo directory.
-
-Once installed, in order to compile with the library use
-
-`-lmap_malloc$(uname -m)_$(uname -s)`
-
-as a compile flag and include library with
-
-`#include <map_malloc.h>`
-
-in the target source files.
+Once installed, in order to compile with the library use `-lmap_malloc$(uname -m)_$(uname -s)` as a compile flag and include library with `#include <map_malloc.h>` in the target source files.
