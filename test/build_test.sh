@@ -40,9 +40,27 @@ int main(void)
 	show_alloc_mem();
 	return (0);
 }" > test.c
+echo "#include "'"../include/map_malloc.h"'"
+#include <stdio.h>
+#include <stdlib.h>
+
+int main(void)
+{
+	char **p;
+
+	p = (char **)map_malloc(sizeof(char *) * 1000000);
+	for (size_t i = 0; i < 1000000; i++)
+		p[i] = map_malloc(sizeof(char) * (MED_BYTES + 1));
+	for (size_t i = 0; i < 1000000; i++)
+		map_free(p[i]);
+	map_free(p);
+	return (0);
+}" > million_test.c
 cd ../
 gcc -Wall -Wextra -Werror -g -I../include -L. ./test/test.c -o test_tmp -lmap_malloc_$(uname -m)_$(uname -s)
+gcc -Wall -Wextra -Werror -g -I../include -L. ./test/million_test.c -o million_test_tmp -lmap_malloc_$(uname -m)_$(uname -s)
 export LD_LIBRARY_PATH=$PWD
-mv test_tmp ./test
+mv million_test_tmp test_tmp ./test
 cd ./test
 mv test_tmp test
+mv million_test_tmp million_test
