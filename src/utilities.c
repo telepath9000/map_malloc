@@ -54,14 +54,19 @@ int		error_handle_munmap(void *target, size_t size)
 int		check_limit(size_t size)
 {
 	struct rlimit	rlim;
+	static rlim_t	limit = 0;
 	int				ret;
 
-	ret = 1;
-	if (getrlimit(RLIMIT_AS, &rlim) == -1)
-		ret = 0;
-	if (ret && g_mem &&
-			(g_mem->total_mem + (rlim_t)get_alloc_size(size)) > rlim.rlim_cur)
-		ret = 0;
+	ret = 0;
+	if (limit == 0)
+	{
+		ret = getrlimit(RLIMIT_AS, &rlim);
+		if (ret == 0)
+			limit = rlim.rlim_cur;
+	}
+	else if (ret && g_mem &&
+			(g_mem->total_mem + (rlim_t)get_alloc_size(size)) > limit)
+		ret = -1;
 	return (ret);
 }
 

@@ -73,7 +73,7 @@ void		*map_malloc(size_t size)
 	void	*ptr;
 
 	ptr = NULL;
-	if (!check_limit(size))
+	if (check_limit(size))
 		write(2, "ERROR: virtual memory space limit has been reached.\n", 56);
 	else if (size > 0)
 	{
