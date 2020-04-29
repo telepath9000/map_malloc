@@ -1,2 +1,4 @@
+#!/bin/bash
+
 make -C ../ fclean
-rm -rfv test test.c million_test.c million_test
+rm -rfv test million_test libmap_malloc_$(uname -m)_$(uname -s).so
