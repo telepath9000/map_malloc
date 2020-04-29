@@ -10,6 +10,10 @@
 /*                                                                            */
 /* ************************************************************************** */
 
+#ifndef _GNU_SOURCE
+# define _GNU_SOURCE
+#endif
+
 #ifndef MAP_MALLOC_H
 # define MAP_MALLOC_H
 
