@@ -17,18 +17,18 @@ void	set_limit(size_t type, size_t inc)
 	if (inc)
 	{
 		if (type == SMALL_BYTES)
-			g_mem->total_mem += (rlim_t)get_alloc_size(SMALL_BYTES);
+			g_mem->total_mem += get_alloc_size(SMALL_BYTES);
 		else if (type == MED_BYTES)
-			g_mem->total_mem += (rlim_t)get_alloc_size(MED_BYTES);
+			g_mem->total_mem += get_alloc_size(MED_BYTES);
 		else
-			g_mem->total_mem += (rlim_t)(LARGE_ALLOC + type);
+			g_mem->total_mem += (LARGE_ALLOC + type);
 	}
 	else
 	{
 		if (type <= SMALL_BYTES)
-			g_mem->total_mem -= (rlim_t)get_alloc_size(SMALL_BYTES);
+			g_mem->total_mem -= get_alloc_size(SMALL_BYTES);
 		else if (type <= MED_BYTES && type > SMALL_BYTES)
-			g_mem->total_mem -= (rlim_t)get_alloc_size(MED_BYTES);
+			g_mem->total_mem -= get_alloc_size(MED_BYTES);
 		else
 			g_mem->total_mem -= (LARGE_ALLOC + type);
 	}

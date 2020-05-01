@@ -25,44 +25,59 @@
 
 # define SMALL_BYTES 1024
 # define MED_BYTES 4096
-# define SIZES (sizeof(t_small *) + sizeof(t_large *) + sizeof(t_med *)) * 2
+# define SIZES sizeof(t_unit *) * 6
 # define GLOBAL SIZES + (sizeof(size_t) * 3) + sizeof(rlim_t)
 # define LARGE 1
-# define SMALL_ALLOC (sizeof(int) * 101) + (sizeof(t_small *) * 2)
-# define MED_ALLOC (sizeof(int) * 101) + (sizeof(t_med *) * 2)
-# define LARGE_ALLOC sizeof(size_t) + (sizeof(t_large *) * 2)
+# define UNIT_ALLOC (sizeof(t_unit *) * 2)
+# define SMALL_ALLOC UNIT_ALLOC + (sizeof(int) * 101)
+# define MED_ALLOC UNIT_ALLOC + (sizeof(int) * 101)
+# define LARGE_ALLOC UNIT_ALLOC + sizeof(size_t)
+
+typedef	enum		e_mem_type
+{
+	small,
+	med,
+	large
+}					t_mem_type;
 
 typedef struct		s_small
 {
-	struct s_small	*next;
-	struct s_small	*prev;
 	int				table[100];
 	int				filled;
 }					t_small;
 
 typedef struct		s_med
 {
-	struct s_med	*next;
-	struct s_med	*prev;
 	int				table[100];
 	int				filled;
 }					t_med;
 
 typedef struct		s_large
 {
-	struct s_large	*next;
-	struct s_large	*prev;
 	size_t			size;
 }					t_large;
 
+union u_mem {
+	t_large		*large;
+	t_med		*med;
+	t_small		*small;
+};
+
+typedef struct		s_unit
+{
+	struct s_unit	*next;
+	struct s_unit	*prev;
+	union u_mem		unit;
+}					t_unit;
+
 typedef struct		s_mem
 {
-	t_small			*small;
-	t_small			*stail;
-	t_med			*med;
-	t_med			*mtail;
-	t_large			*large;
-	t_large			*ltail;
+	t_unit			*small;
+	t_unit			*stail;
+	t_unit			*med;
+	t_unit			*mtail;
+	t_unit			*large;
+	t_unit			*ltail;
 	size_t			ssize;
 	size_t			msize;
 	size_t			lsize;
@@ -72,7 +87,7 @@ typedef struct		s_mem
 extern t_mem		*g_mem;
 
 void				map_free(void *ptr);
-void				free_core(void *prev, void *target, int type);
+void				free_core(t_unit *target, int type);
 
 void				*map_malloc(size_t size);
 
@@ -93,11 +108,12 @@ void				set_limit(size_t type, size_t inc);
 void				malcpy(void *dest, void *src, size_t ref_len, size_t len);
 
 size_t				get_type(size_t size);
-void				*init_chunk(void *mem, size_t type);
-void				set_tail(void *chunk, size_t type);
-void				*find_slot(void *chunk, size_t type);
+t_unit				*init_chunk(t_unit *mem, size_t type);
+void				set_tail(t_unit *chunk, size_t type);
+t_unit				*find_slot(t_unit *chunk, size_t type);
 
 void				add_to_size(size_t type, size_t size);
-size_t				get_type(size_t size);
+
+void				*get_address(void *cur, size_t i, t_mem_type type);
 
 #endif

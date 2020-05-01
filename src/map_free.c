@@ -12,30 +12,26 @@
 
 #include "../include/map_malloc.h"
 
-void		free_core(void *prev, void *target, int type)
+void		free_core(t_unit *target, int type)
 {
+	int	not_begin;
+
+	not_begin = 0;
+	if (target->prev && (not_begin = 1))
+		target->prev->next = target->next;
 	if (type == SMALL_BYTES)
 	{
-		if (prev)
-			((t_small *)prev)->next = ((t_small *)target)->next;
-		else
-			g_mem->small = ((t_small *)target)->next;
+		g_mem->small = !not_begin ? target->next : g_mem->small;
 		g_mem->ssize--;
 	}
 	else if (type == MED_BYTES)
 	{
-		if (prev)
-			((t_med *)prev)->next = ((t_med *)target)->next;
-		else
-			g_mem->med = ((t_med *)target)->next;
+		g_mem->med = !not_begin ? target->next : g_mem->med;
 		g_mem->msize--;
 	}
 	else if (type > MED_BYTES)
 	{
-		if (prev)
-			((t_large *)prev)->next = ((t_large *)target)->next;
-		else
-			g_mem->large = ((t_large*)target)->next;
+		g_mem->large = !not_begin ? target->next : g_mem->large;
 		g_mem->lsize--;
 	}
 	error_handle_munmap(target, get_alloc_size(type));
@@ -43,50 +39,43 @@ void		free_core(void *prev, void *target, int type)
 
 static void	free_large(void *ptr)
 {
-	t_large	*cur;
-	t_large *prev;
+	t_unit	*cur;
 
-	prev = NULL;
 	cur = g_mem->large;
 	while (cur)
 	{
-		if (ptr == (char *)cur + LARGE_ALLOC)
+		if (ptr == (void *)get_address(cur, 0, large))
 		{
-			free_core((void *)prev, (void *)cur, cur->size);
+			free_core((void *)cur, cur->unit.large->size);
 			cur = NULL;
 			break ;
 		}
 		if (cur)
-		{
-			prev = cur;
 			cur = cur->next;
-		}
 	}
 }
 
 static int	free_med(void *ptr)
 {
-	t_med	*cur;
-	t_med	*prev;
+	t_unit	*cur;
+	t_med	*cur_ref;
 	int		ret;
 	int		i;
 
 	cur = g_mem->med;
-	prev = NULL;
 	ret = 0;
 	while ((i = -1) && cur)
 	{
+		cur_ref = cur->unit.med;
 		while (++i < 100)
-			if (cur->table[i] && ptr == (char *)cur + MED_ALLOC +
-					(i * MED_BYTES) && cur->filled--)
+			if (cur_ref->table[i] && ptr == (void *)get_address(cur, i, med))
 			{
-				cur->table[i] = 0;
-				if (++ret && !cur->filled)
-					free_core((void *)prev, (void *)cur, MED_BYTES);
+				cur_ref->table[i] = 0;
+				if (++ret && !(--cur_ref->filled))
+					free_core((void *)cur, MED_BYTES);
 				cur = NULL;
 				break ;
 			}
-		prev = cur;
 		if (cur)
 			cur = cur->next;
 	}
@@ -95,27 +84,26 @@ static int	free_med(void *ptr)
 
 static int	free_small(void *ptr)
 {
-	t_small	*cur;
-	t_small	*prev;
+	t_unit	*cur;
+	t_small	*cur_ref;
 	int		ret;
 	int		i;
 
 	cur = g_mem->small;
-	prev = NULL;
 	ret = 0;
-	while ((i = -1) && cur)
+	while (cur)
 	{
+		i = -1;
+		cur_ref = cur->unit.small;
 		while (++i < 100)
-			if (cur->table[i] && ptr == (char *)cur +
-					SMALL_ALLOC + (i * SMALL_BYTES) && cur->filled--)
+			if (cur_ref->table[i] && ptr == (void *)get_address(cur, i, small))
 			{
-				cur->table[i] = 0;
-				if (++ret && !cur->filled)
-					free_core((void *)prev, (void *)cur, SMALL_BYTES);
+				cur_ref->table[i] = 0;
+				if (++ret && !(--cur_ref->filled))
+					free_core((void *)cur, SMALL_BYTES);
 				cur = NULL;
 				break ;
 			}
-		prev = cur;
 		if (cur)
 			cur = cur->next;
 	}

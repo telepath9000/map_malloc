@@ -13,6 +13,12 @@ int main(void)
 		for (int j = 0; j < 300; j++)
 			ptr[i][j] = 'a';
 	}
+    for (int i = 0; i < 1000; i++) {
+        ptr[i] = map_realloc(ptr, sizeof(char) * 5001);
+        ptr[i][5000] = 0;
+        for (int j = 0; j < 5000; j++)
+            ptr[i][j] = 'b';
+    }
 	for (int i = 300; i < 400; i++)
 		map_free(ptr[i]);
 	for (int i = 300; i < 400; i++)

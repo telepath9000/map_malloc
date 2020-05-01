@@ -12,58 +12,68 @@
 
 #include "../include/map_malloc.h"
 
-static void	insert_chunk(void *chunk, size_t type)
+static void	insert_chunk(t_unit *chunk, size_t type)
 {
 	void	*tmp;
 
 	tmp = find_slot(chunk, type);
-	if (type == SMALL_BYTES)
-	{
-		((t_small *)tmp)->next = (t_small *)chunk;
-		((t_small *)chunk)->prev = (t_small *)tmp;
-		if (((t_small *)chunk)->next)
-			((t_small *)chunk)->next->prev = (t_small *)chunk;
-	}
-	else if (type == MED_BYTES)
-	{
-		((t_med *)tmp)->next = (t_med *)chunk;
-		((t_med *)chunk)->prev = (t_med *)tmp;
-		if (((t_med *)chunk)->next)
-			((t_med *)chunk)->next->prev = (t_med *)chunk;
-	}
-	else
-	{
-		((t_large *)tmp)->next = (t_large *)chunk;
-		((t_large *)chunk)->prev = (t_large *)tmp;
-		if (((t_large *)chunk)->next)
-			((t_large *)chunk)->next->prev = (t_large *)chunk;
-	}
+	((t_unit *)tmp)->next = chunk;
+	((t_unit *)chunk)->prev = tmp;
+	if (((t_unit *)chunk)->next)
+		((t_unit *)chunk)->next->prev = (t_unit *)chunk;
 }
 
-static int	set_initial(void *chunk, size_t type)
+/*static int	set_initial(t_unit *chunk, size_t type)
 {
 	int check;
 
 	check = 0;
 	if (type == SMALL_BYTES && !g_mem->small && (check = 1))
-		g_mem->small = (t_small *)chunk;
+		g_mem->small = chunk;
 	else if (type == MED_BYTES && !g_mem->med && (check = 1))
-		g_mem->med = (t_med *)chunk;
+		g_mem->med = chunk;
 	else if (!g_mem->large && (check = 1))
-		g_mem->large = (t_large *)chunk;
-	if (!check && type == SMALL_BYTES && (t_small *)chunk > g_mem->small &&
-			(((t_small *)chunk)->next = g_mem->small) &&
-			(g_mem->small->prev = (t_small *)chunk) && (check = 1))
-		g_mem->small = (t_small *)chunk;
-	else if (!check && type == MED_BYTES && (t_med *)chunk > g_mem->med &&
-			(((t_med *)chunk)->next = g_mem->med) &&
-			(g_mem->med->prev = (t_med *)chunk) && (check = 1))
-		g_mem->med = (t_med *)chunk;
-	else if (!check && (t_large *)chunk > g_mem->large &&
-			(((t_large *)chunk)->next = g_mem->large) &&
-			(g_mem->large->prev = (t_large *)chunk) && (check = 1))
-		g_mem->large = (t_large *)chunk;
+		g_mem->large = chunk;
+	if (!check && type == SMALL_BYTES && chunk > g_mem->small &&
+			(chunk->next = g_mem->small) &&
+			(g_mem->small->prev = chunk) && (check = 1))
+		g_mem->small = chunk;
+	else if (!check && type == MED_BYTES && chunk > g_mem->med &&
+			(chunk->next = g_mem->med) &&
+			(g_mem->med->prev = chunk) && (check = 1))
+		g_mem->med = chunk;
+	else if (!check && chunk > g_mem->large &&
+			(chunk->next = g_mem->large) &&
+			(g_mem->large->prev = chunk) && (check = 1))
+		g_mem->large = chunk;
 	return (check);
+}*/
+
+static int set_initial(t_unit *chunk, size_t type)
+{
+	t_unit	*to_mod;
+	int 	check;
+
+	check = 0;
+	if (type == SMALL_BYTES)
+		to_mod = g_mem->small;
+	else if (type == MED_BYTES)
+		to_mod = g_mem->med;
+	else
+		to_mod = g_mem->med;
+	if (!to_mod)
+	{
+		check = 1;
+		to_mod = chunk;
+	}
+	else if (chunk > to_mod)
+	{
+		check = 1;
+		chunk->next = to_mod;
+		to_mod->prev = chunk;
+		to_mod = chunk;
+	}
+	return check;
 }
 
 void		*alloc_core(size_t size)

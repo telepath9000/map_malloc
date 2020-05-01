@@ -12,105 +12,113 @@
 
 #include "../include/map_malloc.h"
 
-static size_t	check_large(void *ptr, size_t size)
+static void *check_large(t_unit *cur, void *ptr, size_t size)
 {
-	t_large	*cur;
-	t_large *prev;
-	size_t	tmp_size;
+    void    *ret;
 
-	prev = NULL;
-	cur = g_mem->large;
-	tmp_size = 0;
-	while (cur)
-	{
-		if (ptr == (char *)cur + LARGE_ALLOC)
-		{
-			if (get_alloc_size(tmp_size) < get_alloc_size(size) &&
-					(tmp_size = cur->size) && (cur->size = size))
-				free_core((void *)prev, (void *)cur, tmp_size);
-			cur = NULL;
-			break ;
-		}
-		if (cur)
-		{
-			prev = cur;
-			cur = cur->next;
-		}
-	}
-	return (tmp_size);
+    ret = NULL;
+    if (ptr == (void *)get_address(cur, 0, large) &&
+        get_alloc_size(cur->unit.large->size) != get_alloc_size(size))
+    {
+        ret = map_malloc(size);
+        malcpy(ret, ptr, cur->unit.large->size, size);
+        free_core((void *)cur, cur->unit.large->size);
+    }
+    return (ret);
 }
 
-static size_t	check_med(void *ptr, size_t size)
+static void *check_med(t_unit *cur, void *ptr, size_t size)
 {
-	t_med	*cur;
-	t_med	*prev;
-	size_t	ret;
-	int		i;
+    void    *ret;
+    int		i;
 
-	cur = g_mem->med;
-	prev = NULL;
-	ret = 0;
-	while ((i = -1) && cur)
-	{
-		while (++i < 100)
-			if (cur->table[i] && ptr == (char *)cur + MED_ALLOC +
-				(i * MED_BYTES) && (ret = cur->table[i]) && (cur->table[i] = size) &&
-				(size > MED_BYTES || size < SMALL_BYTES) && cur->filled--)
-			{
-				cur->table[i] = 0;
-				if (!cur->filled)
-					free_core((void *)prev, (void *)cur, MED_BYTES);
-				return (ret);
-			}
-		prev = cur;
-		if (cur)
-			cur = cur->next;
-	}
-	return (ret);
+    ret = NULL;
+    i = -1;
+    while (++i < 100)
+    {
+        if (cur->unit.med->table[i] && ptr == (void *)get_address(cur, i, med))
+        {
+            if (size > MED_BYTES || size < SMALL_BYTES)
+            {
+                cur->unit.med->table[i] = 0;
+                ret = map_malloc(size);
+                malcpy(ret, ptr, cur->unit.med->table[i], size);
+                if (!--(cur->unit.med->filled))
+                    free_core((void *)cur, MED_BYTES);
+                return (ret);
+            }
+            else
+                cur->unit.med->table[i] = size;
+            break ;
+        }
+    }
+    return (ret);
 }
 
-static size_t	check_small(void *ptr, size_t size)
+static void *check_small(t_unit *cur, void *ptr, size_t size)
 {
-	t_small	*cur;
-	t_small	*prev;
-	size_t	ret;
-	int		i;
+    void    *ret;
+    int     i;
 
-	cur = g_mem->small;
-	prev = NULL;
-	ret = 0;
-	while ((i = 0) && cur)
-	{
-		while (++i < 100)
-			if (cur->table[i] && ptr == (char *)cur + SMALL_ALLOC + (i * SMALL_BYTES) &&
-				(ret = cur->table[i]) && (cur->table[i] = size) &&
-			   	size > SMALL_BYTES && cur->filled--)
-			{
-				cur->table[i] = 0;
-				if (!cur->filled)
-					free_core((void *)prev, (void *)cur, SMALL_BYTES);
-				return (ret);
-			}
-		prev = cur;
-		if (cur)
-			cur = cur->next;
-	}
-	return (ret);
+    ret = NULL;
+    i = -1;
+    while (++i < 100)
+    {
+        if (cur->unit.small->table[i] &&
+            ptr == (void *)get_address(cur, i, small))
+        {
+            if (size > SMALL_BYTES)
+            {
+                cur->unit.small->table[i] = 0;
+                ret = map_malloc(size);
+                malcpy(ret, ptr, cur->unit.small->table[i], size);
+                if (!(--cur->unit.small->filled))
+                    free_core(cur, SMALL_BYTES);
+                return (ret);
+            }
+            else
+                cur->unit.small->table[i] = size;
+            break ;
+        }
+    }
+    return (ret);
 }
 
-void		*map_realloc(void *ptr, size_t size)
+static void *iter_list(void *ptr, t_mem_type type, t_unit *list, size_t size)
 {
-	void	*ret;
-	size_t	ref_size;
+    t_unit  *cur;
+    void    *ret;
 
-	ret = ptr;
-	if (((ref_size = check_small(ptr, size)) && size > SMALL_BYTES) ||
-			((ref_size = check_med(ptr, size)) && size > SMALL_BYTES &&
-			 size <= MED_BYTES) ||
-			((ref_size = check_large(ptr, size)) && size > MED_BYTES))
-	{
-		ret = map_malloc(size);
-		malcpy(ret, ptr, ref_size, size);
-	}
-	return (ret);
+    cur = list;
+    ret = NULL;
+    while (cur)
+    {
+        if (type == small)
+            ret = check_small(list, ptr, size);
+        else if (type == med)
+            ret = check_med(list, ptr, size);
+        else
+            ret = check_large(list, ptr, size);
+        if (ret)
+            break ;
+        if (cur)
+            cur = cur->next;
+    }
+    return ret;
+}
+
+void        *map_realloc(void *ptr, size_t size)
+{
+    void	    *ret;
+
+    if (!ptr)
+        return map_malloc(size);
+    if (!(ret = iter_list(ptr, small, g_mem->small, size)) &&
+            !(ret = iter_list(ptr, med, g_mem->med, size)) &&
+            !(ret = iter_list(ptr, large, g_mem->large, size)))
+    {
+        map_free(ptr);
+        return NULL;
+    }
+    return (ret);
 }

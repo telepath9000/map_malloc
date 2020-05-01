@@ -17,23 +17,25 @@ t_mem		*g_mem = NULL;
 static void	*search_memory_med(int size)
 {
 	void	*ret;
-	t_med	*cur;
+	t_unit	*cur;
+	t_med	*cur_med;
 	int		i;
 
 	ret = NULL;
 	cur = g_mem->med;
 	while (cur)
 	{
-		i = (cur->filled < 50) ? 0: 99;
-		if (cur->filled < 100)
+		cur_med = cur->unit.med;
+		i = (cur_med->filled < 50) ? 0 : 99;
+		if (cur_med->filled < 100)
 		{
-			while (cur->filled < 50 && cur->table[i])
+			while (cur_med->filled < 50 && cur_med->table[i])
 				i++;
-			while (cur->filled >= 50 && cur->table[i])
+			while (cur_med->filled >= 50 && cur_med->table[i])
 				i--;
-			cur->table[i] = size;
-			cur->filled++;
-			ret = (char *)cur + MED_ALLOC + (i * MED_BYTES);
+			cur_med->table[i] = size;
+			cur_med->filled++;
+			ret = (void *)get_address(cur, i, med);
 			break ;
 		}
 		cur = cur->next;
@@ -44,23 +46,25 @@ static void	*search_memory_med(int size)
 static void	*search_memory_small(int size)
 {
 	void	*ret;
-	t_small	*cur;
+	t_unit	*cur;
+	t_small	*cur_sml;
 	int		i;
 
 	ret = NULL;
 	cur = g_mem->small;
 	while (cur)
 	{
-		i = (cur->filled < 50) ? 0 : 99;
-		if (cur->filled < 100)
+		cur_sml = cur->unit.small;
+		i = (cur_sml->filled < 50) ? 0 : 99;
+		if (cur_sml->filled < 100)
 		{
-			while (cur->filled < 50 && cur->table[i])
+			while (cur_sml->filled < 50 && cur_sml->table[i])
 				i++;
-			while (cur->filled >= 50 && cur->table[i])
+			while (cur_sml->filled >= 50 && cur_sml->table[i])
 				i--;
-			cur->table[i] = size;
-			cur->filled++;
-			ret = (char *)cur + SMALL_ALLOC + (i * SMALL_BYTES);
+			cur_sml->table[i] = size;
+			cur_sml->filled++;
+			ret = (void *)get_address(cur, i, small);
 			break ;
 		}
 		cur = cur->next;

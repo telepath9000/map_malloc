@@ -36,7 +36,7 @@ static void	print_base(size_t val, int base)
 	write(1, print, size);
 }
 
-static void	print_large_alloc(t_large *node)
+static void	print_large_alloc(t_unit *node)
 {
 	t_large	*n;
 
@@ -45,17 +45,17 @@ static void	print_large_alloc(t_large *node)
 		write(1, "\n", 1);
 		n = (t_large *)((char *)node + LARGE_ALLOC);
 		print_base((size_t)&(*n), 16);
-		n = (t_large *)((char *)node + (node->size - 1));
+		n = (t_large *)((char *)node + (node->unit.large->size - 1));
 		write(1, " - ", 3);
 		print_base((size_t)&(*n), 16);
 		write(1, " : ", 3);
-		print_base(node->size, 10);
+		print_base(node->unit.large->size, 10);
 		write(1, " bytes", 7);
 		node = node->prev;
 	}
 }
 
-static void	print_small_alloc(t_small *node)
+static void	print_small_alloc(t_unit *node)
 {
 	t_small	*n;
 	int		checked;
@@ -63,9 +63,9 @@ static void	print_small_alloc(t_small *node)
 
 	while (node && (i = -1) && !(checked = 0))
 	{
-		while (++i < 100 && checked < node->filled)
-			if (node->table[i] && (n = ((t_small *)(char *)node + SMALL_ALLOC +
-					(i * SMALL_BYTES))) && ++checked)
+		while (++i < 100 && checked < node->unit.small->filled)
+			if (node->unit.small->table[i] &&
+				(n = (t_small *)get_address(node, i, small)) && ++checked)
 			{
 				write(1, "\n", 1);
 				print_base((size_t)&(*n), 16);
@@ -74,7 +74,7 @@ static void	print_small_alloc(t_small *node)
 						((i + 1) * SMALL_BYTES) - 1);
 				print_base((size_t)&(*n), 16);
 				write(1, " : ", 3);
-				print_base(node->table[i], 10);
+				print_base(node->unit.small->table[i], 10);
 				write(1, " bytes", 6);
 			}
 		node = node->prev;
@@ -83,7 +83,7 @@ static void	print_small_alloc(t_small *node)
 }
 
 
-static void	print_med_alloc(t_med *node)
+static void	print_med_alloc(t_unit *node)
 {
 	t_med	*n;
 	int		checked;
@@ -91,8 +91,8 @@ static void	print_med_alloc(t_med *node)
 
 	while (node && (i = -1) && !(checked = 0))
 	{
-		while (++i < 100 && checked < node->filled)
-			if (node->table[i] && (n = ((t_med *)(char *)node + MED_ALLOC +
+		while (++i < 100 && checked < node->unit.med->filled)
+			if (node->unit.med->table[i] && (n = (t_med *)((char *)node + MED_ALLOC +
 					(i * MED_BYTES))) && ++checked)
 			{
 				write(1, "\n", 1);
@@ -102,7 +102,7 @@ static void	print_med_alloc(t_med *node)
 						((i + 1) * MED_BYTES) + 1);
 				print_base((size_t)&(*n), 16);
 				write(1, " : ", 3);
-				print_base(node->table[i], 10);
+				print_base(node->unit.med->table[i], 10);
 				write(1, " bytes", 6);
 			}
 		node = node->prev;
@@ -113,9 +113,9 @@ static void	print_med_alloc(t_med *node)
 
 void	show_alloc_mem(void)
 {
-	t_small	*scur;
-	t_med	*mcur;
-	t_large	*lcur;
+	t_unit	*scur;
+	t_unit	*mcur;
+	t_unit	*lcur;
 
 	if (g_mem)
 	{

@@ -28,41 +28,35 @@ static void	init_mem(void)
 	g_mem->total_mem = 0;
 }
 
-void	*find_slot(void *chunk, size_t type)
+t_unit	*find_slot(t_unit	*chunk, size_t type)
 {
-	void	*ret;
+	t_unit	*ret;
 
-	if (type == SMALL_BYTES && (ret = g_mem->small))
+	if (type == SMALL_BYTES)
+		ret = g_mem->small;
+	else if (type == MED_BYTES)
+		ret = g_mem->med;
+	else
+		ret = g_mem->large;
+	if (ret)
 	{
-		while (((t_small *)ret)->next && chunk > ret)
-			ret = ((t_small *)ret)->next;
-		((t_small *)chunk)->next = ((t_small *)ret)->next;
-	}
-	else if (type == MED_BYTES && (ret = g_mem->med))
-	{
-		while (((t_med *)ret)->next && chunk > ret)
-			ret = ((t_med *)ret)->next;
-		((t_med *)chunk)->next = ((t_med *)ret)->next;
-	}
-	else if ((ret = g_mem->large))
-	{
-		while (((t_large *)ret)->next && chunk > ret)
-			ret = ((t_large *)ret)->next;
-		((t_large *)chunk)->next = ((t_large *)ret)->next;
+		while (ret->next && chunk > ret)
+			ret = ret->next;
+		chunk->next = ret->next;
 	}
 	return (ret);
 }
 
-void	*init_chunk(void *mem, size_t type)
+/*t_unit*init_chunk(t_unit *mem, size_t type)
 {
-	void	*ret;
+	t_unit	*ret;
 	int		i;
 
 	i = -1;
 	if (!g_mem)
 		init_mem();
 	if (type == SMALL_BYTES && !(((t_small *)mem)->next = NULL) &&
-			!(((t_small *)mem)->prev = NULL) && !(((t_small *)mem)->filled = 0))
+			!(mem->prev = NULL) && !(((t_small *)mem)->filled = 0))
 		while (++i < 100)
 			((t_small *)mem)->table[i] = 0;
 	else if (type == MED_BYTES && !(((t_med *)mem)->next = NULL) &&
@@ -79,22 +73,44 @@ void	*init_chunk(void *mem, size_t type)
 	else
 		ret = (char *)mem + LARGE_ALLOC;
 	return (ret);
+}*/
+
+t_unit	*init_chunk(t_unit *mem, size_t type)
+{
+	t_unit	*ret;
+	int		i;
+
+	i = -1;
+	if (!g_mem)
+		init_mem();
+	mem->prev = NULL;
+	mem->next = NULL;
+	if (type == SMALL_BYTES && (mem->unit.small->filled = 0) &&
+		(ret = (t_unit *)((char *)mem + SMALL_ALLOC)))
+		while (++i < 100)
+			mem->unit.small->table[i] = 0;
+	else if (type == MED_BYTES && (mem->unit.med->filled = 0) &&
+		(ret = (t_unit *)((char *)mem + MED_ALLOC)))
+		while (++i < 100)
+			mem->unit.med->table[i] = 0;
+	else if ((ret = (t_unit *)((char *)mem + LARGE_ALLOC)))
+		mem->unit.large->size = type;
+	return ret;
 }
 
-void	set_tail(void *chunk, size_t type)
+void	set_tail(t_unit *chunk, size_t type)
 {
+	t_unit	*tail;
+
 	if (g_mem)
 	{
-		if (type == SMALL_BYTES &&
-				(!g_mem->stail ||
-				 (g_mem->stail && g_mem->stail->next == chunk)))
-			g_mem->stail = chunk;
-		else if (type == MED_BYTES &&
-				(!g_mem->mtail ||
-				 (g_mem->mtail && g_mem->mtail->next == chunk)))
-			g_mem->mtail = chunk;
-		else if (!g_mem->ltail ||
-				(g_mem->ltail && g_mem->ltail->next == chunk))
-			g_mem->ltail = chunk;
+		if (type == SMALL_BYTES)
+			tail = g_mem->stail;
+		else if (type == MED_BYTES)
+			tail = g_mem->mtail;
+		else
+			tail = g_mem->ltail;
+		if (!tail || (tail && tail->next == chunk))
+			tail = chunk;
 	}
 }
