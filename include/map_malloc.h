@@ -10,6 +10,7 @@
 # include <sys/resource.h>
 # include <limits.h>
 # include <sys/time.h>
+# include <string.h>
 
 # define SMALL_BYTES 1024
 # define MED_BYTES 4096
