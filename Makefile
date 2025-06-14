@@ -10,7 +10,7 @@ SRC = src/alloc_core.c src/map_malloc.c src/map_free.c src/utilities.c \
 INC = -I./include
 OBJECTS = src/alloc_core.o src/map_malloc.o src/map_free.o src/utilities.o \
 		  src/map_realloc.o src/show_alloc_mem.o src/util_list.o \
-		  src/utilities2.o src/alloc_helpers.o
+		  src/alloc_helpers.o
 CFLAGS = -g -fPIC -Wall -Werror -Wextra -O3 -Wno-unused-result
 LDFLAGS = -shared
 all: $(NAME)
