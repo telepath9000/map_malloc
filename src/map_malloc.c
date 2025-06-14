@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   map_malloc.c                                       :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: wdebs <marvin@42.fr>                       +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2017/08/05 16:32:37 by wdebs             #+#    #+#             */
-/*   Updated: 2017/08/07 16:47:45 by wdebs            ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include "../include/map_malloc.h"
 
 t_mem		*g_mem = NULL;
@@ -78,7 +66,7 @@ void		*map_malloc(size_t size)
 
 	ptr = NULL;
 	if (check_limit(size))
-		write(2, "ERROR: virtual memory space limit has been reached.\n", 56);
+		write(2, "ERROR: virtual memory space limit has been reached.\n", 53);
 	else if (size > 0)
 	{
 		if (g_mem)
