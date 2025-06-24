@@ -1,109 +1,88 @@
 #include "../include/map_malloc.h"
 
-void		free_core(t_unit *target, int type)
+static void	reduce_size(t_mem_type type)
 {
-	int	not_begin;
-
-	not_begin = 0;
-	if (target->prev && (not_begin = 1))
-		target->prev->next = target->next;
-	if (type == SMALL_BYTES)
+	switch (type)
 	{
-		g_mem->small = !not_begin ? target->next : g_mem->small;
+	case small:
 		g_mem->ssize--;
-	}
-	else if (type == MED_BYTES)
-	{
-		g_mem->med = !not_begin ? target->next : g_mem->med;
+		break ;
+	case med:
 		g_mem->msize--;
-	}
-	else if (type > MED_BYTES)
-	{
-		g_mem->large = !not_begin ? target->next : g_mem->large;
+		break ;
+	case large:
 		g_mem->lsize--;
 	}
-	error_handle_munmap(target, get_alloc_size(type));
 }
 
-static void	free_large(void *ptr)
+void free_core(t_unit *target, t_mem_type type, size_t size)
 {
-	t_unit	*cur;
+	t_unit **list_of_type_head;
 
-	cur = g_mem->large;
-	while (cur)
+	list_of_type_head = get_modifiable_list_of_type(type);
+	reduce_size(type);
+	if (target->prev)
+		target->prev->next = target->next;
+	else
+		*list_of_type_head = target->next;
+	error_handle_munmap(target, size);
+}
+
+static void *initialize_and_free_partition(void *ptr, t_unit *chunk, t_mem_type type, int is_realloc, size_t size, int end)
+{
+	void *ret;
+	int i;
+
+	ret = NULL;
+	i = 0;
+	while (i < end)
 	{
-		if (ptr == (void *)get_address(cur, 0, large))
+		if (chunk->table[i] && ptr == (void *)get_address(chunk, i, type))
 		{
-			free_core((void *)cur, cur->unit.large->size);
-			cur = NULL;
-			break ;
-		}
-		if (cur)
-			cur = cur->next;
-	}
-}
-
-static int	free_med(void *ptr)
-{
-	t_unit	*cur;
-	t_med	*cur_ref;
-	int		ret;
-	int		i;
-
-	cur = g_mem->med;
-	ret = 0;
-	while ((i = -1) && cur)
-	{
-		cur_ref = cur->unit.med;
-		while (++i < 100)
-			if (cur_ref->table[i] && ptr == (void *)get_address(cur, i, med))
+			chunk->table[i] = 0;
+			chunk->filled--;
+			if (is_realloc)
 			{
-				cur_ref->table[i] = 0;
-				if (++ret && !(--cur_ref->filled))
-					free_core((void *)cur, MED_BYTES);
-				cur = NULL;
-				break ;
+				ret = map_malloc(size);
+				malcpy(ret, ptr, chunk->table[i], size);
 			}
-		if (cur)
-			cur = cur->next;
+			else
+				ret = ptr;
+			if (!chunk->filled)
+				free_core((void *)chunk, type, chunk->table[i]);
+			return ret;
+		}
+		i++;
 	}
-	return (ret);
+	return ret;
 }
 
-static int	free_small(void *ptr)
+void *free_or_realloc_type(void *ptr, t_mem_type type, int is_realloc, size_t size)
 {
-	t_unit	*cur;
-	t_small	*cur_ref;
-	int		ret;
-	int		i;
+	t_unit *cur;
+	void *ret;
+	int end;
 
+	end = type == large ? 1 : 100;
 	cur = g_mem->small;
-	ret = 0;
+	ret = NULL;
 	while (cur)
 	{
-		i = -1;
-		cur_ref = cur->unit.small;
-		while (++i < 100)
-			if (cur_ref->table[i] && ptr == (void *)get_address(cur, i, small))
-			{
-				cur_ref->table[i] = 0;
-				if (++ret && !(--cur_ref->filled))
-					free_core((void *)cur, SMALL_BYTES);
-				cur = NULL;
-				break ;
-			}
-		if (cur)
-			cur = cur->next;
+		ret = initialize_and_free_partition(ptr, cur, type, is_realloc, size, end);
+		if (ret)
+			return ret;
+		cur = cur->next;
 	}
-	return (ret);
+	return NULL;
 }
 
-void		map_free(void *ptr)
+void map_free(void *ptr)
 {
 	if (ptr && g_mem)
 	{
-		if (!free_small(ptr) && !free_med(ptr))
-			free_large(ptr);
+		for (int i = 0; i < 3; i++)
+			if (free_or_realloc_type(ptr, g_type_list[i], 0, 0))
+				break;
 		if (!(g_mem->ssize + g_mem->msize + g_mem->lsize))
 		{
 			error_handle_munmap(g_mem, GLOBAL);

@@ -105,9 +105,20 @@ void	add_to_size(size_t type, size_t size)
 size_t	get_type(size_t size)
 {
 	if (size <= SMALL_BYTES)
-		return (SMALL_BYTES);
-	else if (size > SMALL_BYTES && size <= MED_BYTES)
-		return (MED_BYTES);
+		return small;
+	else if (size <= MED_BYTES)
+		return med;
 	else
-		return (size);
+		return large;
+}
+
+void    *get_address(void *cur, size_t i, t_mem_type type)
+{
+    if (type == small)
+        return (char *)cur + SMALL_ALLOC + (i * SMALL_BYTES);
+    else if (type == med)
+        return (char *)cur + MED_ALLOC + (i * MED_BYTES);
+    else if (type == large)
+        return (char *)cur + LARGE_ALLOC;
+    return NULL;
 }

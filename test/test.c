@@ -38,10 +38,10 @@ int main(void)
 				ptr[i][j] = 'c';
 		}
 	}
-	show_alloc_mem();
+	/*show_alloc_mem();*/
 	for (int i = 0; i < 1000; i++)
 		map_free(ptr[i]);
 	map_free(ptr);
-	show_alloc_mem();
+	/*show_alloc_mem();*/
 	return (0);
 }

@@ -1,16 +1,10 @@
-ifeq ($(HOSTTYPE),)
-	HOSTTYPE := $(shell uname -m)_$(shell uname -s)
-endif
-
-NAME = libmap_malloc_$(HOSTTYPE).so
+NAME = libmap_malloc.so
 CC = gcc
 SRC = src/alloc_core.c src/map_malloc.c src/map_free.c src/utilities.c \
-	  src/map_realloc.c src/show_alloc_mem.c src/util_list.c \
-		src/alloc_helpers.c
+	  src/map_realloc.c src/util_list.c
 INC = -I./include
 OBJECTS = src/alloc_core.o src/map_malloc.o src/map_free.o src/utilities.o \
-		  src/map_realloc.o src/show_alloc_mem.o src/util_list.o \
-		  src/alloc_helpers.o
+		  src/map_realloc.o src/util_list.o
 CFLAGS = -g -fPIC -Wall -Werror -Wextra -O3 -Wno-unused-result
 LDFLAGS = -shared
 all: $(NAME)

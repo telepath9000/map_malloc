@@ -1,83 +1,48 @@
 #include "../include/map_malloc.h"
 
-t_mem		*g_mem = NULL;
+t_mem *g_mem = NULL;
+t_mem_type g_type_list[3] = {small, med, large};
 
-static void	*search_memory_med(int size)
+static void *find_available_partition(t_unit *chunk, int size, t_mem_type type)
 {
-	void	*ret;
-	t_unit	*cur;
-	t_med	*cur_med;
-	int		i;
+	int i;
 
-	ret = NULL;
-	cur = g_mem->med;
-	while (cur)
-	{
-		cur_med = cur->unit.med;
-		i = (cur_med->filled < 50) ? 0 : 99;
-		if (cur_med->filled < 100)
-		{
-			while (cur_med->filled < 50 && cur_med->table[i])
-				i++;
-			while (cur_med->filled >= 50 && cur_med->table[i])
-				i--;
-			cur_med->table[i] = size;
-			cur_med->filled++;
-			ret = (void *)get_address(cur, i, med);
-			break ;
-		}
-		cur = cur->next;
-	}
-	return (ret);
+	i = 0;
+	while (chunk->table[i])
+		i++;
+	chunk->table[i] = size;
+	chunk->filled++;
+	return (void *)get_address(chunk, i, type);
 }
 
-static void	*search_memory_small(int size)
+static void *search_memory(int size, t_mem_type type)
 {
-	void	*ret;
-	t_unit	*cur;
-	t_small	*cur_sml;
-	int		i;
+	t_unit *cur;
 
-	ret = NULL;
-	cur = g_mem->small;
+	if (type == large)
+		write(2, "ERROR: large allocations do not require partitioning.\n", 55);
+	cur = get_list_of_type(type);
 	while (cur)
 	{
-		cur_sml = cur->unit.small;
-		i = (cur_sml->filled < 50) ? 0 : 99;
-		if (cur_sml->filled < 100)
-		{
-			while (cur_sml->filled < 50 && cur_sml->table[i])
-				i++;
-			while (cur_sml->filled >= 50 && cur_sml->table[i])
-				i--;
-			cur_sml->table[i] = size;
-			cur_sml->filled++;
-			ret = (void *)get_address(cur, i, small);
-			break ;
-		}
+		if (cur->filled < 100)
+			return find_available_partition(cur, size, type); /* side effects on cur */
 		cur = cur->next;
 	}
-	return (ret);
+	return NULL;
 }
 
-void		*map_malloc(size_t size)
+void *map_malloc(size_t size)
 {
-	void	*ptr;
+	void *ptr;
 
 	ptr = NULL;
 	if (check_limit(size))
 		write(2, "ERROR: virtual memory space limit has been reached.\n", 53);
-	else if (size > 0)
-	{
-		if (g_mem)
-		{
-			if (size <= SMALL_BYTES && g_mem->small)
-				ptr = search_memory_small(size);
-			else if (size <= MED_BYTES && g_mem->med)
-				ptr = search_memory_med(size);
-		}
-		if (!ptr)
-			ptr = alloc_core(size);
-	}
-	return (ptr);
+	if (g_mem && size <= SMALL_BYTES && g_mem->small)
+		ptr = search_memory(size, small);
+	else if (g_mem && size <= MED_BYTES && g_mem->med)
+		ptr = search_memory(size, med);
+	if (!ptr)
+		ptr = alloc_core(size);
+	return ptr;
 }

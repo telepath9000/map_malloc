@@ -5,80 +5,69 @@ static void	init_mem(void)
 	g_mem = mmap(0, GLOBAL,
 			PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
 	g_mem->small = NULL;
-	g_mem->stail = NULL;
 	g_mem->med = NULL;
-	g_mem->mtail = NULL;
 	g_mem->large = NULL;
-	g_mem->ltail = NULL;
 	g_mem->ssize = 0;
 	g_mem->msize = 0;
 	g_mem->lsize = 0;
 	g_mem->total_mem = 0;
 }
 
-t_unit	*find_slot(t_unit	*chunk, size_t type)
+t_unit *get_list_of_type(t_mem_type type)
 {
-	t_unit	*ret;
-
-	if (type == SMALL_BYTES)
-		ret = g_mem->small;
-	else if (type == MED_BYTES)
-		ret = g_mem->med;
-	else
-		ret = g_mem->large;
-	if (ret)
+	switch (type)
 	{
-		while (ret->next && chunk > ret)
-			ret = ret->next;
-		chunk->next = ret->next;
+	case small:
+		return g_mem->small;
+	case med:
+		return g_mem->med;
+	case large:
+		return g_mem->large;
 	}
-	return (ret);
+	return NULL;
 }
 
-t_unit	*init_chunk(t_unit *mem, size_t type)
+t_unit	**get_modifiable_list_of_type(t_mem_type type)
 {
-	t_unit	*ret;
+	switch (type)
+	{
+	case small:
+		return &g_mem->small;
+	case med:
+		return &g_mem->med;
+	case large:
+		return &g_mem->large;
+	}
+	return NULL;
+}
 
+static size_t	get_alloc_size_by_type(t_mem_type type)
+{
+	switch (type)
+	{
+	case small:
+		return SMALL_ALLOC;
+	case med:
+		return MED_ALLOC;
+	case large:
+		return LARGE_ALLOC;
+	}
+	return 0;
+}
+
+void			*init_chunk(t_unit *mem, size_t size)
+{
+	void	*ret;
+	size_t	alloc_size;
+
+	alloc_size = get_alloc_size_by_type(get_type(size));
 	if (!g_mem)
 		init_mem();
 	mem->prev = NULL;
 	mem->next = NULL;
-	if (type == SMALL_BYTES)
-  {
-    ret = (t_unit *)((char *)mem + SMALL_ALLOC);
-		mem->unit.small = (t_small *)((char *)mem + sizeof(t_unit));
-    mem->unit.small->filled = 0;
-    memset(mem->unit.small->table, 0, sizeof(mem->unit.small->table));
-	}
-	else if (type == MED_BYTES)
-	{
-    ret = (t_unit *)((char *)mem + MED_ALLOC);
-		mem->unit.med = (t_med *)((char *)mem + sizeof(t_unit));
-    mem->unit.med->filled = 0;
-    memset(mem->unit.med->table, 0, sizeof(mem->unit.med->table));
-	}
-	else
-	{
-    ret = (t_unit *)((char *)mem + LARGE_ALLOC);
-		mem->unit.large = (t_large *)((char *)mem + sizeof(t_unit));
-		mem->unit.large->size = type;
-	}
+	ret = (t_unit *)((char *)mem + alloc_size);
+	mem = (t_unit *)((char *)mem + sizeof(t_unit));
+	mem->filled = 0;
+	memset(mem->table, 0, sizeof(mem->table));
 	return ret;
-}
-
-void	set_tail(t_unit *chunk, size_t type)
-{
-	t_unit	*tail;
-
-	if (g_mem)
-	{
-		if (type == SMALL_BYTES)
-			tail = g_mem->stail;
-		else if (type == MED_BYTES)
-			tail = g_mem->mtail;
-		else
-			tail = g_mem->ltail;
-		if (!tail || (tail && tail->next == chunk))
-			tail = chunk;
-	}
 }
