@@ -29,11 +29,8 @@ int		error_handle_munmap(void *target, size_t size)
 
 	is_global = (g_mem->ssize + g_mem->msize + g_mem->lsize) ? 1 : 0;
 	err = munmap(target, size);
-	if (err)
-	{
-		write(2, "ERROR: Something bad happened.\n", 31);
+	if (err && write(2, "ERROR: Something bad happened.\n", 31) > -1)
 		return (-1);
-	}
 	else if (is_global)
 		set_limit(size, 0);
 	return (0);
@@ -64,7 +61,7 @@ size_t	get_alloc_size(size_t size)
 	size_t page;
 
 	ret = 0;
-	page = getpagesize();
+	page = (size_t)getpagesize();
 	if (size <= SMALL_BYTES)
 		ret = ((SMALL_BYTES * 100) > page) ? 
 			((((SMALL_BYTES * 100) / page) * page) +
@@ -121,4 +118,10 @@ void    *get_address(void *cur, size_t i, t_mem_type type)
     else if (type == large)
         return (char *)cur + LARGE_ALLOC;
     return NULL;
+}
+
+void	log_output(void)
+{
+	if (write(1, "HERE\n", 5) < 0)
+		return ;
 }

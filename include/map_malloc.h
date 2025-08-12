@@ -11,6 +11,7 @@
 # include <limits.h>
 # include <sys/time.h>
 # include <string.h>
+# include <fcntl.h>
 
 # define SMALL_BYTES 1024
 # define MED_BYTES 4096
@@ -34,7 +35,7 @@ typedef struct		s_unit
 	struct s_unit	*next;
 	struct s_unit	*prev;
 	int				filled;
-	int				table[100];
+	size_t			table[100];
 }					t_unit;
 
 typedef struct		s_mem
@@ -84,5 +85,7 @@ t_unit				*find_slot(t_unit *chunk, size_t type);
 void				add_to_size(size_t type, size_t size);
 
 void				*get_address(void *cur, size_t i, t_mem_type type);
+
+void				log_output();
 
 #endif

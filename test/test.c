@@ -1,5 +1,4 @@
 #include "../include/map_malloc.h"
-#include <stdio.h>
 
 int main(void)
 {
@@ -14,8 +13,9 @@ int main(void)
 			ptr[i][j] = 'a';
 	}
     for (int i = 0; i < 1000; i++) {
-        ptr[i] = map_realloc(ptr, sizeof(char) * 5001);
-        ptr[i][5000] = 0;
+        ptr[i] = map_realloc(ptr[i], sizeof(char) * 5001);
+		if (ptr[i] == NULL)
+			write(1, "wrong\n", 6);
         for (int j = 0; j < 5000; j++)
             ptr[i][j] = 'b';
     }
@@ -38,10 +38,8 @@ int main(void)
 				ptr[i][j] = 'c';
 		}
 	}
-	/*show_alloc_mem();*/
 	for (int i = 0; i < 1000; i++)
 		map_free(ptr[i]);
 	map_free(ptr);
-	/*show_alloc_mem();*/
 	return (0);
 }
