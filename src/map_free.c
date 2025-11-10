@@ -44,7 +44,6 @@ static void *initialize_and_free_partition(void *ptr, t_unit *chunk, t_mem_type 
 			{
 				ret = map_malloc(size);
 				malcpy(ret, ptr, chunk->table[i], size);
-				//log_output();
 			}
 			else
 				ret = ptr;
@@ -59,7 +58,6 @@ static void *initialize_and_free_partition(void *ptr, t_unit *chunk, t_mem_type 
 		}
 		i++;
 	}
-	log_output();
 	return ret;
 }
 
@@ -74,13 +72,11 @@ void *free_or_realloc_type(void *ptr, t_mem_type type, int is_realloc, size_t si
 	ret = NULL;
 	while (cur)
 	{
-		log_output();
 		ret = initialize_and_free_partition(ptr, cur, type, is_realloc, size, end);
 		if (ret)
 			return ret;
 		cur = cur->next;
 	}
-	log_output();
 	return NULL;
 }
 

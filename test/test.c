@@ -14,8 +14,6 @@ int main(void)
 	}
     for (int i = 0; i < 1000; i++) {
         ptr[i] = map_realloc(ptr[i], sizeof(char) * 5001);
-		if (ptr[i] == NULL)
-			write(1, "wrong\n", 6);
         for (int j = 0; j < 5000; j++)
             ptr[i][j] = 'b';
     }

@@ -119,9 +119,3 @@ void    *get_address(void *cur, size_t i, t_mem_type type)
         return (char *)cur + LARGE_ALLOC;
     return NULL;
 }
-
-void	log_output(void)
-{
-	if (write(1, "HERE\n", 5) < 0)
-		return ;
-}

@@ -13,7 +13,6 @@ static void *find_available_partition(t_unit *chunk, size_t size, t_mem_type typ
 		i++;
 	chunk->table[i] = size;
 	chunk->filled++;
-	printf("%zu", (size_t)get_address(chunk, i, type));
 	return (void *)get_address(chunk, i, type);
 }
 
