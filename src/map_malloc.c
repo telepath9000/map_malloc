@@ -1,5 +1,4 @@
 #include "../include/map_malloc.h"
-#include <stdio.h>
 
 t_mem *g_mem = NULL;
 t_mem_type g_type_list[3] = {small, med, large};
@@ -21,13 +20,13 @@ static void *search_memory(size_t size, t_mem_type type)
 	t_unit *cur;
 
 	if (type == large &&
-		write(2, "ERROR: large allocations do not require partitioning.\n", 55) < 0)
+			write(2, "ERROR: large allocations do not require partitioning.\n", 55) < 0)
 		return NULL;
 	cur = get_list_of_type(type);
 	while (cur)
 	{
 		if (cur->filled < 100)
-			return find_available_partition(cur, size, type); /* side effects on cur */
+			return find_available_partition(cur, size, type);
 		cur = cur->next;
 	}
 	return NULL;
@@ -39,7 +38,7 @@ void *map_malloc(size_t size)
 
 	ptr = NULL;
 	if (check_limit(size) &&
-		write(2, "ERROR: virtual memory space limit has been reached.\n", 53) < 0)
+			write(2, "ERROR: virtual memory space limit has been reached.\n", 53) < 0)
 		return NULL;
 	if (g_mem && size <= SMALL_BYTES && g_mem->small)
 		ptr = search_memory(size, small);

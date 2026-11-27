@@ -4,11 +4,11 @@ static void add_chunk(t_unit *chunk, size_t type)
 {
     t_unit  **to_mod;
 
-    to_mod = get_modifiable_list_of_type(type);  // Fixed: use type directly, not get_type(type)
+    to_mod = get_modifiable_list_of_type(type);
     chunk->next = *to_mod;
     if (*to_mod)
         (*to_mod)->prev = chunk;
-    *to_mod = chunk;  // Fixed: assign chunk, not chunk->next
+    *to_mod = chunk;
 }
 
 void        *alloc_core(size_t size)
@@ -26,6 +26,6 @@ void        *alloc_core(size_t size)
         return NULL;
     ret = init_chunk(chunk, size);
     add_to_size(type, size);
-    add_chunk(chunk, type);  // Fixed: pass type enum, not size
+    add_chunk(chunk, type);
     return ret;
 }
