@@ -2,12 +2,12 @@ NAME = libmap_malloc.so
 CC = gcc
 SRC = src/alloc_core.c src/map_malloc.c src/map_free.c src/utilities.c \
 	  src/map_realloc.c src/util_list.c src/util_address.c src/util_partition.c \
-	  src/api_calloc.c src/api_malloc_usable_size.c src/api_secure_free.c \
+	  src/util_search.c src/api_calloc.c src/api_malloc_usable_size.c src/api_secure_free.c \
 	  src/api_posix_memalign.c src/api_reallocarray.c
 INC = -I./include
 OBJECTS = src/alloc_core.o src/map_malloc.o src/map_free.o src/utilities.o \
 	  	src/map_realloc.o src/util_list.o src/util_address.o src/util_partition.o \
-		src/api_calloc.o src/api_malloc_usable_size.o src/api_secure_free.o \
+		src/util_search.o src/api_calloc.o src/api_malloc_usable_size.o src/api_secure_free.o \
 		src/api_posix_memalign.o src/api_reallocarray.o
 CFLAGS = -g -fPIC -Wall -Werror -Wextra -Wpedantic -Wshadow -Wconversion -Wsign-conversion -Wnull-dereference -Wduplicated-cond -Wduplicated-branches -Wlogical-op -Winit-self -Wuninitialized -Wold-style-definition -Wpointer-arith -O3
 LDFLAGS = -shared
